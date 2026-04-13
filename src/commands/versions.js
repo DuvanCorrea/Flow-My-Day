@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { createRequire } from "node:module";
 import { formatText, getHelpText } from "../utils/helpText.js";
+import { reportHandledError } from "../utils/errorHandler.js";
 import { getAvailableVersions } from "../utils/npmClient.js";
 
 const require = createRequire(import.meta.url);
@@ -33,6 +34,11 @@ export function registerVersionsCommand(program, labels = {}) {
         }
       } catch (error) {
         console.log(chalk.red(formatText(text.fetchFailed, { error: error.message })));
+        reportHandledError(error, {
+          source: "command:versions",
+          argv: process.argv,
+          packageName
+        });
         process.exitCode = 1;
       }
     });

@@ -162,6 +162,13 @@ flow config set aliases.daily "list --status open"
 flow config reset
 ```
 
+## Error Logs
+
+If a command fails, Flow writes an error log file and prints the absolute path in the terminal.
+
+- Log folder: `~/.flow/logs`
+- File pattern: `error-YYYYMMDD-HHmmss.log`
+
 ## JSON Data File Format
 
 By default, Flow writes data at:

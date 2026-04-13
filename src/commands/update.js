@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { createRequire } from "node:module";
 import { formatText, getHelpText } from "../utils/helpText.js";
+import { reportHandledError } from "../utils/errorHandler.js";
 import { getAvailableVersions, installGlobalVersion } from "../utils/npmClient.js";
 
 const require = createRequire(import.meta.url);
@@ -74,6 +75,12 @@ export function registerUpdateCommand(program, labels = {}) {
         console.log(chalk.green(formatText(text.updateSuccess, { version: targetVersion })));
       } catch (error) {
         console.log(chalk.red(formatText(text.updateFailed, { error: error.message })));
+        reportHandledError(error, {
+          source: "command:update",
+          argv: process.argv,
+          packageName,
+          requestedVersion: versionArg || "latest"
+        });
         process.exitCode = 1;
       }
     });

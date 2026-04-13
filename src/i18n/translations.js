@@ -10,7 +10,9 @@ export const TRANSLATIONS = {
         emptyList: "No items to show.",
         exportOk: "Export complete at: {path}",
         configUpdated: "Configuration updated.",
-        configReset: "Configuration reset to defaults."
+        configReset: "Configuration reset to defaults.",
+        unexpectedError: "Something went wrong: {error}",
+        errorLogPath: "Error details were saved at: {path}"
       },
       direct: {
         added: "Completed: {text}",
@@ -21,7 +23,9 @@ export const TRANSLATIONS = {
         emptyList: "No items.",
         exportOk: "Exported to: {path}",
         configUpdated: "Configuration saved.",
-        configReset: "Configuration reset."
+        configReset: "Configuration reset.",
+        unexpectedError: "Error: {error}",
+        errorLogPath: "Log saved at: {path}"
       }
     },
     help: {
@@ -151,7 +155,9 @@ export const TRANSLATIONS = {
         emptyList: "No hay items para mostrar.",
         exportOk: "Exportacion completada en: {path}",
         configUpdated: "Configuracion actualizada.",
-        configReset: "Configuracion restaurada por defecto."
+        configReset: "Configuracion restaurada por defecto.",
+        unexpectedError: "Algo salio mal: {error}",
+        errorLogPath: "Los detalles del error se guardaron en: {path}"
       },
       direct: {
         added: "Completado: {text}",
@@ -162,7 +168,9 @@ export const TRANSLATIONS = {
         emptyList: "Sin items.",
         exportOk: "Exportado en: {path}",
         configUpdated: "Configuracion guardada.",
-        configReset: "Configuracion reiniciada."
+        configReset: "Configuracion reiniciada.",
+        unexpectedError: "Error: {error}",
+        errorLogPath: "Log guardado en: {path}"
       }
     },
     help: {
