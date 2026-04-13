@@ -45,5 +45,8 @@
     "chalk": "^5.4.1",
     "commander": "^12.1.0",
     "dayjs": "^1.11.18"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }
