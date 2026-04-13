@@ -3,10 +3,16 @@ import { readUserConfig } from "../config/userConfig.js";
 import { addItem } from "../storage/dataStore.js";
 import { t } from "../utils/messages.js";
 
-export function registerAddCommand(program) {
+const DEFAULT_LABELS = {
+  description: "Log a completed task"
+};
+
+export function registerAddCommand(program, labels = {}) {
+  const text = { ...DEFAULT_LABELS, ...labels };
+
   program
     .command("add <text>")
-    .description("Log a completed task")
+    .description(text.description)
     .action((text) => {
       const config = readUserConfig();
       addItem(config.dataFile, { type: "done", text, status: "done" });

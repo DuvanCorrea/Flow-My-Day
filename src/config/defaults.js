@@ -8,6 +8,6 @@ export const DEFAULT_CONFIG = {
   aliases: {}
 };
 
-export const SUPPORTED_LANGUAGES = ["en"];
+export const SUPPORTED_LANGUAGES = ["en", "es"];
 export const SUPPORTED_TONES = ["friendly", "direct"];
 export const SUPPORTED_EXPORT_FORMATS = ["json", "md"];

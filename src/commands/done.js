@@ -3,10 +3,16 @@ import { readUserConfig } from "../config/userConfig.js";
 import { markItemDone } from "../storage/dataStore.js";
 import { t } from "../utils/messages.js";
 
-export function registerDoneCommand(program) {
+const DEFAULT_LABELS = {
+  description: "Mark an open item as done"
+};
+
+export function registerDoneCommand(program, labels = {}) {
+  const text = { ...DEFAULT_LABELS, ...labels };
+
   program
     .command("done <id>")
-    .description("Mark an open item as done")
+    .description(text.description)
     .action((id) => {
       const config = readUserConfig();
       const item = markItemDone(config.dataFile, id);

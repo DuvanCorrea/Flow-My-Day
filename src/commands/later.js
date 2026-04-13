@@ -3,10 +3,16 @@ import { readUserConfig } from "../config/userConfig.js";
 import { addItem } from "../storage/dataStore.js";
 import { t } from "../utils/messages.js";
 
-export function registerLaterCommand(program) {
+const DEFAULT_LABELS = {
+  description: "Log a task for later"
+};
+
+export function registerLaterCommand(program, labels = {}) {
+  const text = { ...DEFAULT_LABELS, ...labels };
+
   program
     .command("later <text>")
-    .description("Log a task for later")
+    .description(text.description)
     .action((text) => {
       const config = readUserConfig();
       addItem(config.dataFile, { type: "later", text, status: "open" });

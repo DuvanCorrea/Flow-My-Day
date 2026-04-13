@@ -21,7 +21,7 @@ This creates small daily wins, visible momentum, and a clean history you can exp
 - Simple CLI with focused commands
 - Local JSON persistence (no external services)
 - User configuration stored in home directory
-- English-first messaging with configurable tone (`friendly`/`direct`)
+- Bilingual messaging and help output (`en`/`es`) with configurable tone (`friendly`/`direct`)
 - Stats to keep motivation visible
 - Export to JSON and Markdown
 - Ready for npm publishing

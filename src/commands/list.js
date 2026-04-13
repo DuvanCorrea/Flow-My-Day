@@ -1,18 +1,53 @@
 import chalk from "chalk";
+import dayjs from "dayjs";
 import { readUserConfig } from "../config/userConfig.js";
 import { listItems } from "../storage/dataStore.js";
 import { t } from "../utils/messages.js";
 
 const TYPE_ORDER = ["later", "done", "debt"];
 
-const TYPE_STYLE = {
-  later: { label: "Later", emoji: "⏳", color: chalk.yellow },
-  done: { label: "Done", emoji: "✅", color: chalk.green },
-  debt: { label: "Tech Debt", emoji: "🧱", color: chalk.magenta }
+const DEFAULT_LABELS = {
+  description: "List saved items",
+  optionType: "Filter by type: done|later|debt|all",
+  optionStatus: "Filter by status: open|done|all",
+  optionLimit: "Limit number of results",
+  optionJson: "Output as JSON",
+  sections: {
+    later: "Later",
+    done: "Done",
+    debt: "Tech Debt"
+  },
+  status: {
+    done: "done",
+    open: "open"
+  },
+  unknownTime: "unknown-time"
 };
 
-function getTypeStyle(type) {
-  return TYPE_STYLE[type] || { label: type, emoji: "•", color: chalk.white };
+function mergeLabels(labels = {}) {
+  return {
+    ...DEFAULT_LABELS,
+    ...labels,
+    sections: {
+      ...DEFAULT_LABELS.sections,
+      ...(labels.sections || {})
+    },
+    status: {
+      ...DEFAULT_LABELS.status,
+      ...(labels.status || {})
+    }
+  };
+}
+
+function getTypeStyle(type, labels) {
+  const sectionLabels = labels.sections || {};
+  const styleMap = {
+    later: { label: sectionLabels.later, emoji: "⏳", color: chalk.yellow },
+    done: { label: sectionLabels.done, emoji: "✅", color: chalk.green },
+    debt: { label: sectionLabels.debt, emoji: "🧱", color: chalk.magenta }
+  };
+
+  return styleMap[type] || { label: type, emoji: "•", color: chalk.white };
 }
 
 function groupItemsByType(items) {
@@ -32,7 +67,12 @@ function buildRenderOrder(groupedItems) {
   return [...knownOrder, ...customOrder];
 }
 
-function renderGroupedItems(items) {
+function formatTimestamp(value, unknownTimeLabel) {
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD HH:mm:ss") : unknownTimeLabel;
+}
+
+function renderGroupedItems(items, labels) {
   const groupedItems = groupItemsByType(items);
   const renderOrder = buildRenderOrder(groupedItems);
   let hasPrintedSection = false;
@@ -48,24 +88,29 @@ function renderGroupedItems(items) {
     }
     hasPrintedSection = true;
 
-    const style = getTypeStyle(type);
+    const style = getTypeStyle(type, labels);
     console.log(style.color(`${style.label} ${style.emoji} (${sectionItems.length})`));
 
     for (const item of sectionItems) {
-      const statusTag = item.status === "done" ? chalk.green("done") : chalk.yellow("open");
-      console.log("  -", style.color(`#${item.id}`), item.text, statusTag);
+      const statusTag = item.status === "done"
+        ? chalk.green(labels.status.done)
+        : chalk.yellow(labels.status.open);
+      const createdAt = chalk.gray(`[${formatTimestamp(item.createdAt, labels.unknownTime)}]`);
+      console.log("  -", style.color(`#${item.id}`), item.text, statusTag, createdAt);
     }
   }
 }
 
-export function registerListCommand(program) {
+export function registerListCommand(program, labels = {}) {
+  const text = mergeLabels(labels);
+
   program
     .command("list")
-    .description("List saved items")
-    .option("-t, --type <type>", "Filter by type: done|later|debt|all", "all")
-    .option("-s, --status <status>", "Filter by status: open|done|all", "all")
-    .option("-l, --limit <number>", "Limit number of results")
-    .option("--json", "Output as JSON", false)
+    .description(text.description)
+    .option("-t, --type <type>", text.optionType, "all")
+    .option("-s, --status <status>", text.optionStatus, "all")
+    .option("-l, --limit <number>", text.optionLimit)
+    .option("--json", text.optionJson, false)
     .action((options) => {
       const config = readUserConfig();
       const limit = options.limit ? Number(options.limit) : undefined;
@@ -85,6 +130,6 @@ export function registerListCommand(program) {
         return;
       }
 
-      renderGroupedItems(items);
+      renderGroupedItems(items, text);
     });
 }

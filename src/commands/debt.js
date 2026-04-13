@@ -3,10 +3,16 @@ import { readUserConfig } from "../config/userConfig.js";
 import { addItem } from "../storage/dataStore.js";
 import { t } from "../utils/messages.js";
 
-export function registerDebtCommand(program) {
+const DEFAULT_LABELS = {
+  description: "Log technical debt"
+};
+
+export function registerDebtCommand(program, labels = {}) {
+  const text = { ...DEFAULT_LABELS, ...labels };
+
   program
     .command("debt <text>")
-    .description("Log technical debt")
+    .description(text.description)
     .action((text) => {
       const config = readUserConfig();
       addItem(config.dataFile, { type: "debt", text, status: "open" });

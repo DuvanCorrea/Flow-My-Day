@@ -5,7 +5,14 @@ import { readUserConfig } from "../config/userConfig.js";
 import { SUPPORTED_EXPORT_FORMATS } from "../config/defaults.js";
 import { readData } from "../storage/dataStore.js";
 import { exportData } from "../utils/exporters.js";
+import { formatText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
+
+const DEFAULT_LABELS = {
+  description: "Export your data to JSON or Markdown",
+  optionFormat: "Export format: json|md",
+  invalidFormat: "Invalid format: {format}. Use json or md."
+};
 
 function resolveOutputPath(output, format) {
   if (output) {
@@ -16,17 +23,19 @@ function resolveOutputPath(output, format) {
   return path.resolve(process.cwd(), filename);
 }
 
-export function registerExportCommand(program) {
+export function registerExportCommand(program, labels = {}) {
+  const text = { ...DEFAULT_LABELS, ...labels };
+
   program
     .command("export [output]")
-    .description("Export your data to JSON or Markdown")
-    .option("-f, --format <format>", "Export format: json|md")
+    .description(text.description)
+    .option("-f, --format <format>", text.optionFormat)
     .action((output, options) => {
       const config = readUserConfig();
       const format = options.format || config.exportFormat;
 
       if (!SUPPORTED_EXPORT_FORMATS.includes(format)) {
-        console.log(chalk.red(`Invalid format: ${format}. Use json or md.`));
+        console.log(chalk.red(formatText(text.invalidFormat, { format })));
         process.exitCode = 1;
         return;
       }

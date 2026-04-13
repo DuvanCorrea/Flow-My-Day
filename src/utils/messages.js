@@ -1,4 +1,28 @@
 const CATALOG = {
+  es: {
+    friendly: {
+      added: "Listo. Registrado como completado: {text}",
+      later: "Guardado para despues: {text}",
+      debt: "Deuda tecnica registrada: {text}",
+      done: "Marcado como completado: #{id}",
+      notFound: "No se encontro el item #{id}",
+      emptyList: "No hay items para mostrar.",
+      exportOk: "Exportacion completada en: {path}",
+      configUpdated: "Configuracion actualizada.",
+      configReset: "Configuracion restaurada por defecto."
+    },
+    direct: {
+      added: "Completado: {text}",
+      later: "Pendiente guardado: {text}",
+      debt: "Deuda registrada: {text}",
+      done: "Completado: #{id}",
+      notFound: "Item no encontrado: #{id}",
+      emptyList: "Sin items.",
+      exportOk: "Exportado en: {path}",
+      configUpdated: "Configuracion guardada.",
+      configReset: "Configuracion reiniciada."
+    }
+  },
   en: {
     friendly: {
       added: "Done. Logged as completed: {text}",

@@ -1,6 +1,11 @@
 import { Command } from "commander";
 import { createRequire } from "node:module";
-import { ensureUserConfig } from "./config/userConfig.js";
+import { readUserConfig } from "./config/userConfig.js";
+import {
+  buildExamplesHelp,
+  formatLocalizedHelp,
+  getHelpText
+} from "./utils/helpText.js";
 import { registerAddCommand } from "./commands/add.js";
 import { registerLaterCommand } from "./commands/later.js";
 import { registerDebtCommand } from "./commands/debt.js";
@@ -14,39 +19,33 @@ const require = createRequire(import.meta.url);
 const { version } = require("../package.json");
 
 export function buildProgram() {
-  ensureUserConfig();
+  const config = readUserConfig();
+  const helpText = getHelpText(config.language);
 
   const program = new Command();
 
   program
     .name("flow")
-    .description("Personal CLI to track completed work, later tasks, and technical debt")
-    .version(version)
-    .showHelpAfterError("\nUse flow --help to view commands and examples.");
+    .description(helpText.cli.description)
+    .version(version, "-V, --version", helpText.cli.versionDescription)
+    .helpOption("-h, --help", helpText.cli.helpOptionDescription)
+    .addHelpCommand("help [command]", helpText.cli.helpCommandDescription)
+    .showHelpAfterError(`\n${helpText.cli.helpAfterError}`);
 
-  program.addHelpText(
-    "after",
-    `
-Examples:
-  flow add "Fix login bug"
-  flow later "Write onboarding docs"
-  flow debt "Split monolithic payment handler"
-  flow list --status open
-  flow done 4
-  flow stats
-  flow export ./reports/today.md -f md
-  flow config set language en
-`
-  );
+  program.configureHelp({
+    formatHelp: (cmd, helper) => formatLocalizedHelp(cmd, helper, helpText.cli.helpSections)
+  });
 
-  registerAddCommand(program);
-  registerLaterCommand(program);
-  registerDebtCommand(program);
-  registerListCommand(program);
-  registerDoneCommand(program);
-  registerStatsCommand(program);
-  registerExportCommand(program);
-  registerConfigCommand(program);
+  program.addHelpText("after", buildExamplesHelp(helpText.cli.examplesTitle, helpText.cli.examples));
+
+  registerAddCommand(program, helpText.commands.add);
+  registerLaterCommand(program, helpText.commands.later);
+  registerDebtCommand(program, helpText.commands.debt);
+  registerListCommand(program, helpText.commands.list);
+  registerDoneCommand(program, helpText.commands.done);
+  registerStatsCommand(program, helpText.commands.stats);
+  registerExportCommand(program, helpText.commands.export);
+  registerConfigCommand(program, helpText.commands.config);
 
   return program;
 }

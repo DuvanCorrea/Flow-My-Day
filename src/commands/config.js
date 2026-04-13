@@ -10,7 +10,20 @@ import {
   SUPPORTED_LANGUAGES,
   SUPPORTED_TONES
 } from "../config/defaults.js";
+import { formatText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
+
+const DEFAULT_LABELS = {
+  description: "View and update user configuration",
+  getDescription: "Read a configuration value",
+  setDescription: "Set a configuration value",
+  resetDescription: "Restore default configuration",
+  configPathLabel: "Config path",
+  keyNotFound: "Key does not exist: {key}",
+  validationLanguage: "language must be: {supported}",
+  validationTone: "tone must be: {supported}",
+  validationExportFormat: "exportFormat must be: {supported}"
+};
 
 function parseValue(value) {
   const trimmed = String(value).trim();
@@ -30,41 +43,49 @@ function getByPath(target, keyPath) {
   return keyPath.split(".").reduce((acc, key) => (acc ? acc[key] : undefined), target);
 }
 
-function validateKnownKey(key, value) {
+function validateKnownKey(key, value, labels) {
   if (key === "language" && !SUPPORTED_LANGUAGES.includes(value)) {
-    return `language must be: ${SUPPORTED_LANGUAGES.join("|")}`;
+    return formatText(labels.validationLanguage, {
+      supported: SUPPORTED_LANGUAGES.join("|")
+    });
   }
 
   if (key === "tone" && !SUPPORTED_TONES.includes(value)) {
-    return `tone must be: ${SUPPORTED_TONES.join("|")}`;
+    return formatText(labels.validationTone, {
+      supported: SUPPORTED_TONES.join("|")
+    });
   }
 
   if (key === "exportFormat" && !SUPPORTED_EXPORT_FORMATS.includes(value)) {
-    return `exportFormat must be: ${SUPPORTED_EXPORT_FORMATS.join("|")}`;
+    return formatText(labels.validationExportFormat, {
+      supported: SUPPORTED_EXPORT_FORMATS.join("|")
+    });
   }
 
   return null;
 }
 
-export function registerConfigCommand(program) {
+export function registerConfigCommand(program, labels = {}) {
+  const text = { ...DEFAULT_LABELS, ...labels };
+
   const configCommand = program
     .command("config")
-    .description("View and update user configuration");
+    .description(text.description);
 
   configCommand.action(() => {
     const config = readUserConfig();
-    console.log(chalk.cyan(`Config path: ${getUserConfigPath()}`));
+    console.log(chalk.cyan(`${text.configPathLabel}: ${getUserConfigPath()}`));
     console.log(JSON.stringify(config, null, 2));
   });
 
   configCommand
     .command("get <key>")
-    .description("Read a configuration value")
+    .description(text.getDescription)
     .action((key) => {
       const config = readUserConfig();
       const value = getByPath(config, key);
       if (value === undefined) {
-        console.log(chalk.red(`Key does not exist: ${key}`));
+        console.log(chalk.red(formatText(text.keyNotFound, { key })));
         process.exitCode = 1;
         return;
       }
@@ -77,11 +98,10 @@ export function registerConfigCommand(program) {
 
   configCommand
     .command("set <key> <value>")
-    .description("Set a configuration value")
+    .description(text.setDescription)
     .action((key, value) => {
-      const current = readUserConfig();
       const parsedValue = parseValue(value);
-      const validationError = validateKnownKey(key, parsedValue);
+      const validationError = validateKnownKey(key, parsedValue, text);
 
       if (validationError) {
         console.log(chalk.red(validationError));
@@ -89,16 +109,15 @@ export function registerConfigCommand(program) {
         return;
       }
 
-      setUserConfigValue(key, parsedValue);
-      console.log(chalk.green(t(current, "configUpdated")));
+      const updated = setUserConfigValue(key, parsedValue);
+      console.log(chalk.green(t(updated, "configUpdated")));
     });
 
   configCommand
     .command("reset")
-    .description("Restore default configuration")
+    .description(text.resetDescription)
     .action(() => {
-      const current = readUserConfig();
-      resetUserConfig();
-      console.log(chalk.yellow(t(current, "configReset")));
+      const reset = resetUserConfig();
+      console.log(chalk.yellow(t(reset, "configReset")));
     });
 }

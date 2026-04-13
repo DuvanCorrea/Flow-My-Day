@@ -95,6 +95,8 @@ test("list groups items by section with emojis", (t) => {
   assert.match(output, /Done ✅ \(1\)/);
   assert.match(output, /Tech Debt 🧱 \(1\)/);
   assert.match(output, /\s-\s#\d+/);
+  assert.match(output, /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/);
+  assert.doesNotMatch(output, /\.\d{3}/);
 
   const laterPos = output.indexOf("Later ⏳");
   const donePos = output.indexOf("Done ✅");
@@ -119,6 +121,41 @@ test("config set/get persists preferences", (t) => {
   const configPath = path.join(sandbox.home, ".flow", "config.json");
   const config = readJson(configPath);
   assert.equal(config.language, "en");
+});
+
+// Verifies that Spanish messages are used when language is configured to es.
+test("uses Spanish messages when language is es", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const setResult = runFlow(["config", "set", "language", "es"], { env });
+  assert.equal(setResult.status, 0, combineOutput(setResult));
+
+  const laterResult = runFlow(["later", "Preparar reporte semanal"], { env });
+  assert.equal(laterResult.status, 0, combineOutput(laterResult));
+
+  const output = combineOutput(laterResult);
+  assert.match(output, /Guardado para despues/);
+});
+
+// Verifies help output is localized according to language config.
+test("help output is localized when language is es", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const setResult = runFlow(["config", "set", "language", "es"], { env });
+  assert.equal(setResult.status, 0, combineOutput(setResult));
+
+  const helpResult = runFlow(["help"], { env });
+  assert.equal(helpResult.status, 0, combineOutput(helpResult));
+
+  const output = combineOutput(helpResult);
+  assert.match(output, /CLI personal para registrar tareas hechas, pendientes y deuda tecnica/);
+  assert.match(output, /Registrar una tarea completada/);
+  assert.match(output, /Ver y actualizar configuracion de usuario/);
+  assert.match(output, /Ejemplos:/);
 });
 
 // Validates markdown export output and output path creation.
