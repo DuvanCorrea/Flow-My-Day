@@ -91,12 +91,18 @@ export function addItem(dataFile, { type, text, status }) {
 export function markItemDone(dataFile, itemId) {
   const data = readData(dataFile);
   const id = Number(itemId);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return null;
+  }
+
   const item = data.items.find((entry) => entry.id === id);
 
   if (!item) {
     return null;
   }
 
+  item.type = "done";
   item.status = "done";
   item.doneAt = nowIso();
 

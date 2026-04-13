@@ -81,7 +81,7 @@ function renderGroupedItems(items, labels) {
         ? chalk.green(labels.status.done)
         : chalk.yellow(labels.status.open);
       const createdAt = chalk.gray(`[${formatTimestamp(item.createdAt, labels.unknownTime)}]`);
-      console.log("  -", style.color(`#${item.id}`), item.text, statusTag, createdAt);
+      console.log("  -", style.color(`#${item.id}`), statusTag, item.text, createdAt);
     }
   }
 }

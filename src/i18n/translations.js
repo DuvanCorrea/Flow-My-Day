@@ -6,6 +6,7 @@ export const TRANSLATIONS = {
         later: "Saved for later: {text}",
         debt: "Technical debt logged: {text}",
         done: "Marked as done: #{id}",
+        invalidId: "Invalid item id: {id}. Use a positive number.",
         notFound: "Could not find item #{id}",
         emptyList: "No items to show.",
         exportOk: "Export complete at: {path}",
@@ -19,6 +20,7 @@ export const TRANSLATIONS = {
         later: "Queued for later: {text}",
         debt: "Debt logged: {text}",
         done: "Completed: #{id}",
+        invalidId: "Invalid item id: {id}. Use a positive number.",
         notFound: "Item not found: #{id}",
         emptyList: "No items.",
         exportOk: "Exported to: {path}",
@@ -80,7 +82,7 @@ export const TRANSLATIONS = {
           unknownTime: "unknown-time"
         },
         done: {
-          description: "Mark an open item as done"
+          description: "Mark an open item as done, or create one directly"
         },
         stats: {
           description: "Show quick productivity metrics",
@@ -151,6 +153,7 @@ export const TRANSLATIONS = {
         later: "Guardado para despues: {text}",
         debt: "Deuda tecnica registrada: {text}",
         done: "Marcado como completado: #{id}",
+        invalidId: "ID de item invalido: {id}. Usa un numero positivo.",
         notFound: "No se encontro el item #{id}",
         emptyList: "No hay items para mostrar.",
         exportOk: "Exportacion completada en: {path}",
@@ -164,6 +167,7 @@ export const TRANSLATIONS = {
         later: "Pendiente guardado: {text}",
         debt: "Deuda registrada: {text}",
         done: "Completado: #{id}",
+        invalidId: "ID de item invalido: {id}. Usa un numero positivo.",
         notFound: "Item no encontrado: #{id}",
         emptyList: "Sin items.",
         exportOk: "Exportado en: {path}",
@@ -225,7 +229,7 @@ export const TRANSLATIONS = {
           unknownTime: "hora-desconocida"
         },
         done: {
-          description: "Marcar un item abierto como hecho"
+          description: "Marcar un item abierto como hecho, o crear uno directo"
         },
         stats: {
           description: "Mostrar metricas rapidas de productividad",

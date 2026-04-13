@@ -115,7 +115,40 @@ test("done changes open item status", (t) => {
 
   assert.equal(items.length, 1);
   assert.equal(items[0].id, 1);
+  assert.equal(items[0].type, "done");
   assert.equal(items[0].status, "done");
+  assert.ok(items[0].doneAt);
+});
+
+// Ensures done rejects invalid ids with a clear validation error.
+test("done rejects invalid item id", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const doneResult = runFlow(["done", "0"], { env });
+
+  assert.equal(doneResult.status, 1, combineOutput(doneResult));
+  assert.match(combineOutput(doneResult), /Invalid item id: 0/);
+});
+
+// Ensures done can create a new completed item directly from text.
+test("done creates completed item from text", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const doneResult = runFlow(["done", "Ship release checklist"], { env });
+  assert.equal(doneResult.status, 0, combineOutput(doneResult));
+
+  const listResult = runFlow(["list", "--json"], { env });
+  assert.equal(listResult.status, 0, combineOutput(listResult));
+  const items = JSON.parse(stripAnsi(listResult.stdout).trim());
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0].type, "done");
+  assert.equal(items[0].status, "done");
+  assert.equal(items[0].text, "Ship release checklist");
   assert.ok(items[0].doneAt);
 });
 
@@ -137,6 +170,7 @@ test("list groups items by section with emojis", (t) => {
   assert.match(output, /Done ✅ \(1\)/);
   assert.match(output, /Tech Debt 🧱 \(1\)/);
   assert.match(output, /\s-\s#\d+/);
+  assert.match(output, /\s-\s#\d+\s(done|open)\s/);
   assert.match(output, /\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/);
   assert.doesNotMatch(output, /\.\d{3}/);
 

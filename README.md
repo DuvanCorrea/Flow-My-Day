@@ -36,7 +36,7 @@ flow stats
 | `flow later <text>` | Registra una tarea para despues |
 | `flow debt <text>` | Registra deuda tecnica |
 | `flow list` | Lista items por seccion con color y emoji |
-| `flow done <id>` | Marca un item como completado |
+| `flow done <id|text>` | Marca un item por id como completado, o crea uno nuevo como completado |
 | `flow stats` | Muestra estadisticas rapidas |
 | `flow export [output]` | Exporta a JSON o Markdown |
 | `flow config` | Muestra configuracion actual |
