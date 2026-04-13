@@ -29,11 +29,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-user/flow-my-day.git"
+    "url": "https://github.com/DuvanCorrea/Flow-My-Day.git"
   },
-  "homepage": "https://github.com/your-user/flow-my-day#readme",
+  "homepage": "https://github.com/DuvanCorrea/Flow-My-Day#readme",
   "bugs": {
-    "url": "https://github.com/your-user/flow-my-day/issues"
+    "url": "https://github.com/DuvanCorrea/Flow-My-Day/issues"
   },
   "files": [
     "bin",
@@ -45,8 +45,5 @@
     "chalk": "^5.4.1",
     "commander": "^12.1.0",
     "dayjs": "^1.11.18"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   }
 }
