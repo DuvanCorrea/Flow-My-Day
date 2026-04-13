@@ -1,0 +1,47 @@
+{
+  "name": "flow-my-day",
+  "version": "0.1.0",
+  "description": "Personal productivity CLI to track completed tasks, later tasks, and technical debt.",
+  "type": "module",
+  "bin": {
+    "flow": "./bin/flow.js"
+  },
+  "main": "src/cli.js",
+  "scripts": {
+    "start": "node ./bin/flow.js",
+    "dev": "node ./bin/flow.js",
+    "check": "node --check ./src/cli.js",
+    "help": "node ./bin/flow.js --help"
+  },
+  "keywords": [
+    "cli",
+    "productivity",
+    "tasks",
+    "technical-debt",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-user/flow-my-day.git"
+  },
+  "homepage": "https://github.com/your-user/flow-my-day#readme",
+  "bugs": {
+    "url": "https://github.com/your-user/flow-my-day/issues"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^12.1.0",
+    "dayjs": "^1.11.18"
+  }
+}
