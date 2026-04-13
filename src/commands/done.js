@@ -1,11 +1,10 @@
 import chalk from "chalk";
 import { readUserConfig } from "../config/userConfig.js";
 import { markItemDone } from "../storage/dataStore.js";
+import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
-const DEFAULT_LABELS = {
-  description: "Mark an open item as done"
-};
+const DEFAULT_LABELS = getHelpText("en").commands.done;
 
 export function registerDoneCommand(program, labels = {}) {
   const text = { ...DEFAULT_LABELS, ...labels };

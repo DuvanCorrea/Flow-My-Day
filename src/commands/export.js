@@ -5,14 +5,10 @@ import { readUserConfig } from "../config/userConfig.js";
 import { SUPPORTED_EXPORT_FORMATS } from "../config/defaults.js";
 import { readData } from "../storage/dataStore.js";
 import { exportData } from "../utils/exporters.js";
-import { formatText } from "../utils/helpText.js";
+import { formatText, getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
-const DEFAULT_LABELS = {
-  description: "Export your data to JSON or Markdown",
-  optionFormat: "Export format: json|md",
-  invalidFormat: "Invalid format: {format}. Use json or md."
-};
+const DEFAULT_LABELS = getHelpText("en").commands.export;
 
 function resolveOutputPath(output, format) {
   if (output) {

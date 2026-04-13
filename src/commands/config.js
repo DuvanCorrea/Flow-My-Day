@@ -10,20 +10,10 @@ import {
   SUPPORTED_LANGUAGES,
   SUPPORTED_TONES
 } from "../config/defaults.js";
-import { formatText } from "../utils/helpText.js";
+import { formatText, getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
-const DEFAULT_LABELS = {
-  description: "View and update user configuration",
-  getDescription: "Read a configuration value",
-  setDescription: "Set a configuration value",
-  resetDescription: "Restore default configuration",
-  configPathLabel: "Config path",
-  keyNotFound: "Key does not exist: {key}",
-  validationLanguage: "language must be: {supported}",
-  validationTone: "tone must be: {supported}",
-  validationExportFormat: "exportFormat must be: {supported}"
-};
+const DEFAULT_LABELS = getHelpText("en").commands.config;
 
 function parseValue(value) {
   const trimmed = String(value).trim();

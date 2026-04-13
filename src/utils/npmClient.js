@@ -2,6 +2,15 @@ import { spawnSync } from "node:child_process";
 
 const NPM_CMD = process.platform === "win32" ? "npm.cmd" : "npm";
 
+function quoteArg(arg) {
+  const value = String(arg ?? "");
+  if (!/[\s"'`]/.test(value)) {
+    return value;
+  }
+
+  return `"${value.replace(/"/g, '\\"')}"`;
+}
+
 function parseNpmJsonOutput(raw) {
   const text = String(raw || "").trim();
   if (!text) {
@@ -38,6 +47,16 @@ function parseNpmJsonOutput(raw) {
 }
 
 function runNpm(args, options = {}) {
+  if (process.platform === "win32") {
+    const command = `npm ${args.map(quoteArg).join(" ")}`;
+    return spawnSync(command, {
+      encoding: "utf8",
+      stdio: "pipe",
+      shell: true,
+      ...options
+    });
+  }
+
   return spawnSync(NPM_CMD, args, {
     encoding: "utf8",
     stdio: "pipe",
@@ -58,9 +77,11 @@ function normalizeVersions(value) {
 }
 
 function formatNpmError(result) {
+  const processError = result.error?.message ? String(result.error.message).trim() : "";
   const stderr = String(result.stderr || "").trim();
   const stdout = String(result.stdout || "").trim();
 
+  if (processError) return processError;
   if (stderr) return stderr;
   if (stdout) return stdout;
   return `npm exited with code ${result.status ?? "unknown"}`;

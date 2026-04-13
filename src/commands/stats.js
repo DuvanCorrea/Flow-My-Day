@@ -1,21 +1,9 @@
 import chalk from "chalk";
 import { readUserConfig } from "../config/userConfig.js";
 import { getStats } from "../storage/dataStore.js";
+import { getHelpText } from "../utils/helpText.js";
 
-const DEFAULT_LABELS = {
-  description: "Show quick productivity metrics",
-  optionJson: "Output as JSON",
-  title: "Flow Stats",
-  totalLabel: "Total",
-  doneLabel: "Done",
-  openLabel: "Open",
-  byTypeLabel: "By type",
-  typeNames: {
-    done: "done",
-    later: "later",
-    debt: "debt"
-  }
-};
+const DEFAULT_LABELS = getHelpText("en").commands.stats;
 
 function mergeLabels(labels = {}) {
   return {

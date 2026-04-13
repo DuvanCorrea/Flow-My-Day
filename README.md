@@ -84,6 +84,33 @@ flow stats
 | `flow versions` | List all published npm versions and mark current/latest |
 | `flow update [version]` | Update global CLI (`latest` by default) |
 
+## Update Flow
+
+Check published versions:
+
+```bash
+flow versions
+```
+
+Update to latest:
+
+```bash
+flow update
+```
+
+Update to a specific version:
+
+```bash
+flow update 1.0.1
+```
+
+Preview the npm command without installing:
+
+```bash
+flow update --dry-run
+flow update 1.0.1 --dry-run
+```
+
 ## Available Flags
 
 ### `flow list`

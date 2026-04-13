@@ -2,27 +2,12 @@ import chalk from "chalk";
 import dayjs from "dayjs";
 import { readUserConfig } from "../config/userConfig.js";
 import { listItems } from "../storage/dataStore.js";
+import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
 const TYPE_ORDER = ["later", "done", "debt"];
 
-const DEFAULT_LABELS = {
-  description: "List saved items",
-  optionType: "Filter by type: done|later|debt|all",
-  optionStatus: "Filter by status: open|done|all",
-  optionLimit: "Limit number of results",
-  optionJson: "Output as JSON",
-  sections: {
-    later: "Later",
-    done: "Done",
-    debt: "Tech Debt"
-  },
-  status: {
-    done: "done",
-    open: "open"
-  },
-  unknownTime: "unknown-time"
-};
+const DEFAULT_LABELS = getHelpText("en").commands.list;
 
 function mergeLabels(labels = {}) {
   return {

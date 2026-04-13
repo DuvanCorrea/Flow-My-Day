@@ -1,11 +1,10 @@
 import chalk from "chalk";
 import { readUserConfig } from "../config/userConfig.js";
 import { addItem } from "../storage/dataStore.js";
+import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
-const DEFAULT_LABELS = {
-  description: "Log a completed task"
-};
+const DEFAULT_LABELS = getHelpText("en").commands.add;
 
 export function registerAddCommand(program, labels = {}) {
   const text = { ...DEFAULT_LABELS, ...labels };

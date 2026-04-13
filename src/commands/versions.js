@@ -1,19 +1,12 @@
 import chalk from "chalk";
 import { createRequire } from "node:module";
-import { formatText } from "../utils/helpText.js";
+import { formatText, getHelpText } from "../utils/helpText.js";
 import { getAvailableVersions } from "../utils/npmClient.js";
 
 const require = createRequire(import.meta.url);
 const { name: packageName, version: currentVersion } = require("../../package.json");
 
-const DEFAULT_LABELS = {
-  description: "List available published versions",
-  listTitle: "Available versions for {package}",
-  latestTag: "latest",
-  currentTag: "current",
-  noVersions: "No published versions found.",
-  fetchFailed: "Could not fetch versions: {error}"
-};
+const DEFAULT_LABELS = getHelpText("en").commands.versions;
 
 export function registerVersionsCommand(program, labels = {}) {
   const text = { ...DEFAULT_LABELS, ...labels };

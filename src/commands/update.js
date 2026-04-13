@@ -1,22 +1,12 @@
 import chalk from "chalk";
 import { createRequire } from "node:module";
-import { formatText } from "../utils/helpText.js";
+import { formatText, getHelpText } from "../utils/helpText.js";
 import { getAvailableVersions, installGlobalVersion } from "../utils/npmClient.js";
 
 const require = createRequire(import.meta.url);
 const { name: packageName, version: currentVersion } = require("../../package.json");
 
-const DEFAULT_LABELS = {
-  description: "Update flow globally (default: latest)",
-  optionDryRun: "Show npm command without installing",
-  noVersions: "No published versions found.",
-  versionNotAvailable: "Version {version} is not available. Run flow versions.",
-  alreadyUpToDate: "You are already on version {version}.",
-  dryRunCommand: "Dry run: npm install -g {package}@{version}",
-  installing: "Installing {package}@{version} globally...",
-  updateSuccess: "Update complete. Installed version: {version}",
-  updateFailed: "Update failed: {error}"
-};
+const DEFAULT_LABELS = getHelpText("en").commands.update;
 
 function resolveTargetVersion(requestedVersion, latestVersion, versions) {
   if (!requestedVersion || requestedVersion === "latest") {
