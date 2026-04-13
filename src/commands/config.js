@@ -32,15 +32,15 @@ function getByPath(target, keyPath) {
 
 function validateKnownKey(key, value) {
   if (key === "language" && !SUPPORTED_LANGUAGES.includes(value)) {
-    return `language debe ser: ${SUPPORTED_LANGUAGES.join("|")}`;
+    return `language must be: ${SUPPORTED_LANGUAGES.join("|")}`;
   }
 
   if (key === "tone" && !SUPPORTED_TONES.includes(value)) {
-    return `tone debe ser: ${SUPPORTED_TONES.join("|")}`;
+    return `tone must be: ${SUPPORTED_TONES.join("|")}`;
   }
 
   if (key === "exportFormat" && !SUPPORTED_EXPORT_FORMATS.includes(value)) {
-    return `exportFormat debe ser: ${SUPPORTED_EXPORT_FORMATS.join("|")}`;
+    return `exportFormat must be: ${SUPPORTED_EXPORT_FORMATS.join("|")}`;
   }
 
   return null;
@@ -49,7 +49,7 @@ function validateKnownKey(key, value) {
 export function registerConfigCommand(program) {
   const configCommand = program
     .command("config")
-    .description("Ver y actualizar configuracion de usuario");
+    .description("View and update user configuration");
 
   configCommand.action(() => {
     const config = readUserConfig();
@@ -59,12 +59,12 @@ export function registerConfigCommand(program) {
 
   configCommand
     .command("get <key>")
-    .description("Leer una propiedad de configuracion")
+    .description("Read a configuration value")
     .action((key) => {
       const config = readUserConfig();
       const value = getByPath(config, key);
       if (value === undefined) {
-        console.log(chalk.red(`No existe la clave: ${key}`));
+        console.log(chalk.red(`Key does not exist: ${key}`));
         process.exitCode = 1;
         return;
       }
@@ -77,7 +77,7 @@ export function registerConfigCommand(program) {
 
   configCommand
     .command("set <key> <value>")
-    .description("Guardar una propiedad de configuracion")
+    .description("Set a configuration value")
     .action((key, value) => {
       const current = readUserConfig();
       const parsedValue = parseValue(value);
@@ -95,7 +95,7 @@ export function registerConfigCommand(program) {
 
   configCommand
     .command("reset")
-    .description("Restaurar configuracion por defecto")
+    .description("Restore default configuration")
     .action(() => {
       const current = readUserConfig();
       resetUserConfig();

@@ -21,7 +21,7 @@ This creates small daily wins, visible momentum, and a clean history you can exp
 - Simple CLI with focused commands
 - Local JSON persistence (no external services)
 - User configuration stored in home directory
-- Multi-language and tone support (`es`/`en`, `friendly`/`direct`)
+- English-first messaging with configurable tone (`friendly`/`direct`)
 - Stats to keep motivation visible
 - Export to JSON and Markdown
 - Ready for npm publishing
@@ -33,6 +33,13 @@ This creates small daily wins, visible momentum, and a clean history you can exp
 ```bash
 npm install
 npm run help
+```
+
+### Run tests
+
+```bash
+npm test
+npm run test:watch
 ```
 
 ### Use globally from local source
@@ -66,7 +73,7 @@ flow stats
 | `flow add <text>` | Register a completed task |
 | `flow later <text>` | Register a task for later |
 | `flow debt <text>` | Register technical debt |
-| `flow list` | List stored items |
+| `flow list` | List stored items grouped by section with colors and emojis |
 | `flow done <id>` | Mark an item as done |
 | `flow stats` | Show quick productivity stats |
 | `flow export [output]` | Export data to JSON or MD |
@@ -102,7 +109,7 @@ Default config:
 
 ```json
 {
-	"language": "es",
+	"language": "en",
 	"tone": "friendly",
 	"exportFormat": "md",
 	"dataFile": "~/.flow/data.json",

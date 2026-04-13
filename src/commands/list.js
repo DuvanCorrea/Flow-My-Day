@@ -3,21 +3,69 @@ import { readUserConfig } from "../config/userConfig.js";
 import { listItems } from "../storage/dataStore.js";
 import { t } from "../utils/messages.js";
 
-function colorByType(type) {
-  if (type === "done") return chalk.green;
-  if (type === "later") return chalk.yellow;
-  if (type === "debt") return chalk.magenta;
-  return chalk.white;
+const TYPE_ORDER = ["later", "done", "debt"];
+
+const TYPE_STYLE = {
+  later: { label: "Later", emoji: "⏳", color: chalk.yellow },
+  done: { label: "Done", emoji: "✅", color: chalk.green },
+  debt: { label: "Tech Debt", emoji: "🧱", color: chalk.magenta }
+};
+
+function getTypeStyle(type) {
+  return TYPE_STYLE[type] || { label: type, emoji: "•", color: chalk.white };
+}
+
+function groupItemsByType(items) {
+  return items.reduce((groups, item) => {
+    if (!groups[item.type]) {
+      groups[item.type] = [];
+    }
+    groups[item.type].push(item);
+    return groups;
+  }, {});
+}
+
+function buildRenderOrder(groupedItems) {
+  const groupedTypes = Object.keys(groupedItems);
+  const knownOrder = TYPE_ORDER.filter((type) => groupedTypes.includes(type));
+  const customOrder = groupedTypes.filter((type) => !TYPE_ORDER.includes(type));
+  return [...knownOrder, ...customOrder];
+}
+
+function renderGroupedItems(items) {
+  const groupedItems = groupItemsByType(items);
+  const renderOrder = buildRenderOrder(groupedItems);
+  let hasPrintedSection = false;
+
+  for (const type of renderOrder) {
+    const sectionItems = groupedItems[type] || [];
+    if (!sectionItems.length) {
+      continue;
+    }
+
+    if (hasPrintedSection) {
+      console.log("");
+    }
+    hasPrintedSection = true;
+
+    const style = getTypeStyle(type);
+    console.log(style.color(`${style.label} ${style.emoji} (${sectionItems.length})`));
+
+    for (const item of sectionItems) {
+      const statusTag = item.status === "done" ? chalk.green("done") : chalk.yellow("open");
+      console.log("  -", style.color(`#${item.id}`), item.text, statusTag);
+    }
+  }
 }
 
 export function registerListCommand(program) {
   program
     .command("list")
-    .description("Listar items guardados")
-    .option("-t, --type <type>", "Filtrar por tipo: done|later|debt|all", "all")
-    .option("-s, --status <status>", "Filtrar por estado: open|done|all", "all")
-    .option("-l, --limit <number>", "Limitar cantidad de resultados")
-    .option("--json", "Mostrar salida en JSON", false)
+    .description("List saved items")
+    .option("-t, --type <type>", "Filter by type: done|later|debt|all", "all")
+    .option("-s, --status <status>", "Filter by status: open|done|all", "all")
+    .option("-l, --limit <number>", "Limit number of results")
+    .option("--json", "Output as JSON", false)
     .action((options) => {
       const config = readUserConfig();
       const limit = options.limit ? Number(options.limit) : undefined;
@@ -37,10 +85,6 @@ export function registerListCommand(program) {
         return;
       }
 
-      for (const item of items) {
-        const painter = colorByType(item.type);
-        const statusTag = item.status === "done" ? chalk.green("done") : chalk.yellow("open");
-        console.log(painter(`#${item.id}`), item.text, chalk.gray(`[${item.type}]`), statusTag);
-      }
+      renderGroupedItems(items);
     });
 }

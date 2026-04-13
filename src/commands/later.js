@@ -6,7 +6,7 @@ import { t } from "../utils/messages.js";
 export function registerLaterCommand(program) {
   program
     .command("later <text>")
-    .description("Registrar una tarea para despues")
+    .description("Log a task for later")
     .action((text) => {
       const config = readUserConfig();
       addItem(config.dataFile, { type: "later", text, status: "open" });

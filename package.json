@@ -1,6 +1,6 @@
 {
   "name": "flow-my-day",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Personal productivity CLI to track completed tasks, later tasks, and technical debt.",
   "type": "module",
   "bin": {
@@ -11,7 +11,9 @@
     "start": "node ./bin/flow.js",
     "dev": "node ./bin/flow.js",
     "check": "node --check ./src/cli.js",
-    "help": "node ./bin/flow.js --help"
+    "help": "node ./bin/flow.js --help",
+    "test": "node --test \"test/**/*.test.js\"",
+    "test:watch": "node --test --watch \"test/**/*.test.js\""
   },
   "keywords": [
     "cli",
@@ -20,7 +22,7 @@
     "technical-debt",
     "nodejs"
   ],
-  "author": "",
+  "author": "Duvan Felipe Correa Ardila <duvancorrea96@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"

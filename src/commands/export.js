@@ -19,14 +19,14 @@ function resolveOutputPath(output, format) {
 export function registerExportCommand(program) {
   program
     .command("export [output]")
-    .description("Exportar tus datos a JSON o Markdown")
-    .option("-f, --format <format>", "Formato de exportacion: json|md")
+    .description("Export your data to JSON or Markdown")
+    .option("-f, --format <format>", "Export format: json|md")
     .action((output, options) => {
       const config = readUserConfig();
       const format = options.format || config.exportFormat;
 
       if (!SUPPORTED_EXPORT_FORMATS.includes(format)) {
-        console.log(chalk.red(`Formato invalido: ${format}. Usa json o md.`));
+        console.log(chalk.red(`Invalid format: ${format}. Use json or md.`));
         process.exitCode = 1;
         return;
       }

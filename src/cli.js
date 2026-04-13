@@ -20,14 +20,14 @@ export function buildProgram() {
 
   program
     .name("flow")
-    .description("CLI personal para registrar hechos, pendientes y deuda tecnica")
+    .description("Personal CLI to track completed work, later tasks, and technical debt")
     .version(version)
-    .showHelpAfterError("\nUsa flow --help para ver ejemplos y comandos.");
+    .showHelpAfterError("\nUse flow --help to view commands and examples.");
 
   program.addHelpText(
     "after",
     `
-Ejemplos:
+Examples:
   flow add "Fix login bug"
   flow later "Write onboarding docs"
   flow debt "Split monolithic payment handler"

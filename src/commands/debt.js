@@ -6,7 +6,7 @@ import { t } from "../utils/messages.js";
 export function registerDebtCommand(program) {
   program
     .command("debt <text>")
-    .description("Registrar deuda tecnica")
+    .description("Log technical debt")
     .action((text) => {
       const config = readUserConfig();
       addItem(config.dataFile, { type: "debt", text, status: "open" });

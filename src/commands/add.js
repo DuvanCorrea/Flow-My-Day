@@ -6,7 +6,7 @@ import { t } from "../utils/messages.js";
 export function registerAddCommand(program) {
   program
     .command("add <text>")
-    .description("Registrar una tarea ya completada")
+    .description("Log a completed task")
     .action((text) => {
       const config = readUserConfig();
       addItem(config.dataFile, { type: "done", text, status: "done" });

@@ -5,8 +5,8 @@ import { getStats } from "../storage/dataStore.js";
 export function registerStatsCommand(program) {
   program
     .command("stats")
-    .description("Mostrar metricas rapidas de productividad")
-    .option("--json", "Mostrar salida en JSON", false)
+    .description("Show quick productivity metrics")
+    .option("--json", "Output as JSON", false)
     .action((options) => {
       const config = readUserConfig();
       const stats = getStats(config.dataFile);

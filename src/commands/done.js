@@ -6,7 +6,7 @@ import { t } from "../utils/messages.js";
 export function registerDoneCommand(program) {
   program
     .command("done <id>")
-    .description("Marcar un item pendiente como hecho")
+    .description("Mark an open item as done")
     .action((id) => {
       const config = readUserConfig();
       const item = markItemDone(config.dataFile, id);
