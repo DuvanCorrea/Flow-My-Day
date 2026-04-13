@@ -30,6 +30,48 @@ test("help shows core commands", (t) => {
   assert.match(output, /debt <text>/);
   assert.match(output, /stats/);
   assert.match(output, /config/);
+  assert.match(output, /versions/);
+  assert.match(output, /update \[options\] \[version\]/);
+});
+
+// Verifies that short and long version flags both return the package version.
+test("version flags -V and --version work", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const shortResult = runFlow(["-V"], { env });
+  const longResult = runFlow(["--version"], { env });
+
+  assert.equal(shortResult.status, 0, combineOutput(shortResult));
+  assert.equal(longResult.status, 0, combineOutput(longResult));
+
+  const shortVersion = stripAnsi(shortResult.stdout).trim();
+  const longVersion = stripAnsi(longResult.stdout).trim();
+
+  assert.match(shortVersion, /^\d+\.\d+\.\d+$/);
+  assert.equal(longVersion, shortVersion);
+});
+
+// Verifies that short and long help flags both show usage output.
+test("help flags -h and --help work", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const shortResult = runFlow(["-h"], { env });
+  const longResult = runFlow(["--help"], { env });
+
+  assert.equal(shortResult.status, 0, combineOutput(shortResult));
+  assert.equal(longResult.status, 0, combineOutput(longResult));
+
+  const shortOutput = combineOutput(shortResult);
+  const longOutput = combineOutput(longResult);
+
+  assert.match(shortOutput, /(Usage|Uso): flow \[options\] \[command\]/);
+  assert.match(longOutput, /(Usage|Uso): flow \[options\] \[command\]/);
+  assert.match(shortOutput, /-V, --version/);
+  assert.match(longOutput, /-h, --help/);
 });
 
 // Ensures that add/later/debt write data and stats --json reflects those entries.
@@ -155,6 +197,8 @@ test("help output is localized when language is es", (t) => {
   assert.match(output, /CLI personal para registrar tareas hechas, pendientes y deuda tecnica/);
   assert.match(output, /Registrar una tarea completada/);
   assert.match(output, /Ver y actualizar configuracion de usuario/);
+  assert.match(output, /Listar versiones publicadas disponibles/);
+  assert.match(output, /Actualizar flow globalmente/);
   assert.match(output, /Ejemplos:/);
 });
 

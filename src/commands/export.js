@@ -24,7 +24,14 @@ function resolveOutputPath(output, format) {
 }
 
 export function registerExportCommand(program, labels = {}) {
-  const text = { ...DEFAULT_LABELS, ...labels };
+  const text = {
+    ...DEFAULT_LABELS,
+    ...labels,
+    markdownStatus: {
+      ...DEFAULT_LABELS.markdownStatus,
+      ...(labels.markdownStatus || {})
+    }
+  };
 
   program
     .command("export [output]")
@@ -43,7 +50,7 @@ export function registerExportCommand(program, labels = {}) {
       const data = readData(config.dataFile);
       const outputPath = resolveOutputPath(output, format);
 
-      exportData({ data, format, outputPath });
+      exportData({ data, format, outputPath, labels: text });
       console.log(chalk.blue(t(config, "exportOk", { path: outputPath })));
     });
 }

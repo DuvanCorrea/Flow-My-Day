@@ -70,7 +70,17 @@ const HELP_TEXTS = {
       export: {
         description: "Export your data to JSON or Markdown",
         optionFormat: "Export format: json|md",
-        invalidFormat: "Invalid format: {format}. Use json or md."
+        invalidFormat: "Invalid format: {format}. Use json or md.",
+        markdownTitle: "Flow Daily Log",
+        markdownGenerated: "Generated",
+        markdownEmpty: "No items.",
+        markdownSectionDone: "Done",
+        markdownSectionLater: "Later",
+        markdownSectionDebt: "Technical Debt",
+        markdownStatus: {
+          done: "done",
+          open: "open"
+        }
       },
       config: {
         description: "View and update user configuration",
@@ -82,6 +92,25 @@ const HELP_TEXTS = {
         validationLanguage: "language must be: {supported}",
         validationTone: "tone must be: {supported}",
         validationExportFormat: "exportFormat must be: {supported}"
+      },
+      versions: {
+        description: "List available published versions",
+        listTitle: "Available versions for {package}",
+        latestTag: "latest",
+        currentTag: "current",
+        noVersions: "No published versions found.",
+        fetchFailed: "Could not fetch versions: {error}"
+      },
+      update: {
+        description: "Update flow globally (default: latest)",
+        optionDryRun: "Show npm command without installing",
+        noVersions: "No published versions found.",
+        versionNotAvailable: "Version {version} is not available. Run flow versions.",
+        alreadyUpToDate: "You are already on version {version}.",
+        dryRunCommand: "Dry run: npm install -g {package}@{version}",
+        installing: "Installing {package}@{version} globally...",
+        updateSuccess: "Update complete. Installed version: {version}",
+        updateFailed: "Update failed: {error}"
       }
     }
   },
@@ -156,7 +185,17 @@ const HELP_TEXTS = {
       export: {
         description: "Exportar tus datos a JSON o Markdown",
         optionFormat: "Formato de exportacion: json|md",
-        invalidFormat: "Formato invalido: {format}. Usa json o md."
+        invalidFormat: "Formato invalido: {format}. Usa json o md.",
+        markdownTitle: "Registro Diario Flow",
+        markdownGenerated: "Generado",
+        markdownEmpty: "Sin items.",
+        markdownSectionDone: "Hecho",
+        markdownSectionLater: "Pendiente",
+        markdownSectionDebt: "Deuda Tecnica",
+        markdownStatus: {
+          done: "hecho",
+          open: "abierto"
+        }
       },
       config: {
         description: "Ver y actualizar configuracion de usuario",
@@ -168,6 +207,25 @@ const HELP_TEXTS = {
         validationLanguage: "language debe ser: {supported}",
         validationTone: "tone debe ser: {supported}",
         validationExportFormat: "exportFormat debe ser: {supported}"
+      },
+      versions: {
+        description: "Listar versiones publicadas disponibles",
+        listTitle: "Versiones disponibles de {package}",
+        latestTag: "latest",
+        currentTag: "actual",
+        noVersions: "No se encontraron versiones publicadas.",
+        fetchFailed: "No se pudieron consultar las versiones: {error}"
+      },
+      update: {
+        description: "Actualizar flow globalmente (por defecto: latest)",
+        optionDryRun: "Mostrar comando npm sin instalar",
+        noVersions: "No se encontraron versiones publicadas.",
+        versionNotAvailable: "La version {version} no esta disponible. Ejecuta flow versions.",
+        alreadyUpToDate: "Ya tienes la version {version}.",
+        dryRunCommand: "Simulacion: npm install -g {package}@{version}",
+        installing: "Instalando {package}@{version} globalmente...",
+        updateSuccess: "Actualizacion completa. Version instalada: {version}",
+        updateFailed: "Fallo la actualizacion: {error}"
       }
     }
   }

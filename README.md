@@ -81,6 +81,8 @@ flow stats
 | `flow config get <key>` | Read a config value |
 | `flow config set <key> <value>` | Update a config value |
 | `flow config reset` | Restore default config |
+| `flow versions` | List all published npm versions and mark current/latest |
+| `flow update [version]` | Update global CLI (`latest` by default) |
 
 ## Available Flags
 
@@ -98,6 +100,10 @@ flow stats
 ### `flow export`
 
 - `-f, --format <format>`: `json|md`
+
+### `flow update`
+
+- `--dry-run`: print npm install command without executing
 
 ## Configuration
 

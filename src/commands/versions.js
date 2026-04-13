@@ -1,0 +1,46 @@
+import chalk from "chalk";
+import { createRequire } from "node:module";
+import { formatText } from "../utils/helpText.js";
+import { getAvailableVersions } from "../utils/npmClient.js";
+
+const require = createRequire(import.meta.url);
+const { name: packageName, version: currentVersion } = require("../../package.json");
+
+const DEFAULT_LABELS = {
+  description: "List available published versions",
+  listTitle: "Available versions for {package}",
+  latestTag: "latest",
+  currentTag: "current",
+  noVersions: "No published versions found.",
+  fetchFailed: "Could not fetch versions: {error}"
+};
+
+export function registerVersionsCommand(program, labels = {}) {
+  const text = { ...DEFAULT_LABELS, ...labels };
+
+  program
+    .command("versions")
+    .description(text.description)
+    .action(() => {
+      try {
+        const { versions, latestVersion } = getAvailableVersions(packageName);
+
+        if (!versions.length) {
+          console.log(chalk.yellow(text.noVersions));
+          return;
+        }
+
+        console.log(chalk.cyan(formatText(text.listTitle, { package: packageName })));
+        for (const version of versions) {
+          const tags = [];
+          if (version === latestVersion) tags.push(text.latestTag);
+          if (version === currentVersion) tags.push(text.currentTag);
+          const suffix = tags.length ? chalk.gray(` (${tags.join(", ")})`) : "";
+          console.log(`  - ${version}${suffix}`);
+        }
+      } catch (error) {
+        console.log(chalk.red(formatText(text.fetchFailed, { error: error.message })));
+        process.exitCode = 1;
+      }
+    });
+}

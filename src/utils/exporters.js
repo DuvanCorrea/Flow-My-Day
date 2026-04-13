@@ -2,6 +2,19 @@ import fs from "node:fs";
 import path from "node:path";
 import dayjs from "dayjs";
 
+const DEFAULT_MARKDOWN_LABELS = {
+  markdownTitle: "Flow Daily Log",
+  markdownGenerated: "Generated",
+  markdownEmpty: "No items.",
+  markdownSectionDone: "Done",
+  markdownSectionLater: "Later",
+  markdownSectionDebt: "Technical Debt",
+  markdownStatus: {
+    done: "done",
+    open: "open"
+  }
+};
+
 function ensureOutputDirectory(filePath) {
   const directory = path.dirname(filePath);
   if (!fs.existsSync(directory)) {
@@ -9,15 +22,31 @@ function ensureOutputDirectory(filePath) {
   }
 }
 
-export function toMarkdown(data, title = "Flow Export") {
+function mergeMarkdownLabels(labels = {}) {
+  return {
+    ...DEFAULT_MARKDOWN_LABELS,
+    ...labels,
+    markdownStatus: {
+      ...DEFAULT_MARKDOWN_LABELS.markdownStatus,
+      ...(labels.markdownStatus || {})
+    }
+  };
+}
+
+function mapStatus(status, labels) {
+  return labels.markdownStatus[status] || status;
+}
+
+export function toMarkdown(data, labelsInput = {}) {
+  const labels = mergeMarkdownLabels(labelsInput);
   const lines = [];
-  lines.push(`# ${title}`);
+  lines.push(`# ${labels.markdownTitle}`);
   lines.push("");
-  lines.push(`Generated: ${dayjs().format("YYYY-MM-DD HH:mm")}`);
+  lines.push(`${labels.markdownGenerated}: ${dayjs().format("YYYY-MM-DD HH:mm")}`);
   lines.push("");
 
   if (!data.items.length) {
-    lines.push("No items.");
+    lines.push(labels.markdownEmpty);
     return `${lines.join("\n")}\n`;
   }
 
@@ -27,28 +56,28 @@ export function toMarkdown(data, title = "Flow Export") {
     debt: data.items.filter((item) => item.type === "debt")
   };
 
-  lines.push("## Done");
+  lines.push(`## ${labels.markdownSectionDone}`);
   for (const item of groups.done) {
     lines.push(`- #${item.id} ${item.text} (${item.createdAt})`);
   }
   lines.push("");
 
-  lines.push("## Later");
+  lines.push(`## ${labels.markdownSectionLater}`);
   for (const item of groups.later) {
-    lines.push(`- #${item.id} ${item.text} [${item.status}]`);
+    lines.push(`- #${item.id} ${item.text} [${mapStatus(item.status, labels)}]`);
   }
   lines.push("");
 
-  lines.push("## Technical Debt");
+  lines.push(`## ${labels.markdownSectionDebt}`);
   for (const item of groups.debt) {
-    lines.push(`- #${item.id} ${item.text} [${item.status}]`);
+    lines.push(`- #${item.id} ${item.text} [${mapStatus(item.status, labels)}]`);
   }
   lines.push("");
 
   return `${lines.join("\n")}\n`;
 }
 
-export function exportData({ data, format, outputPath }) {
+export function exportData({ data, format, outputPath, labels }) {
   ensureOutputDirectory(outputPath);
 
   if (format === "json") {
@@ -56,7 +85,7 @@ export function exportData({ data, format, outputPath }) {
     return outputPath;
   }
 
-  const markdown = toMarkdown(data, "Flow Daily Log");
+  const markdown = toMarkdown(data, labels);
   fs.writeFileSync(outputPath, markdown, "utf8");
   return outputPath;
 }

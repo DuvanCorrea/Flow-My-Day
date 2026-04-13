@@ -14,6 +14,8 @@ import { registerDoneCommand } from "./commands/done.js";
 import { registerStatsCommand } from "./commands/stats.js";
 import { registerExportCommand } from "./commands/export.js";
 import { registerConfigCommand } from "./commands/config.js";
+import { registerVersionsCommand } from "./commands/versions.js";
+import { registerUpdateCommand } from "./commands/update.js";
 
 const require = createRequire(import.meta.url);
 const { version } = require("../package.json");
@@ -46,6 +48,8 @@ export function buildProgram() {
   registerStatsCommand(program, helpText.commands.stats);
   registerExportCommand(program, helpText.commands.export);
   registerConfigCommand(program, helpText.commands.config);
+  registerVersionsCommand(program, helpText.commands.versions);
+  registerUpdateCommand(program, helpText.commands.update);
 
   return program;
 }
