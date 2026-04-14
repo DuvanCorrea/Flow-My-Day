@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import type { Command } from "commander";
+import { createActivityRepository } from "../application/factories/createActivityRepository.js";
 import { readUserConfig } from "../config/userConfig.js";
 import { addLaterActivity } from "../application/useCases/manageActivities.js";
 import { getHelpText } from "../utils/helpText.js";
@@ -16,7 +17,8 @@ export function registerLaterCommand(program: Command, labels: Partial<LaterComm
     .description(text.description)
     .action((text: string) => {
       const config = readUserConfig();
-      addLaterActivity(config.dataFile, text);
+      const repository = createActivityRepository(config.dataFile);
+      addLaterActivity(repository, text);
       console.log(chalk.yellow(t(config, "later", { text })));
     });
 }

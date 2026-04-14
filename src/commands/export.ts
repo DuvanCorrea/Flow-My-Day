@@ -2,9 +2,9 @@ import path from "node:path";
 import dayjs from "dayjs";
 import chalk from "chalk";
 import type { Command } from "commander";
+import { createActivityRepository } from "../application/factories/createActivityRepository.js";
 import { readUserConfig } from "../config/userConfig.js";
 import { SUPPORTED_EXPORT_FORMATS } from "../config/defaults.js";
-import { readData } from "../storage/dataStore.js";
 import { exportData } from "../utils/exporters.js";
 import { formatText, getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
@@ -52,7 +52,8 @@ export function registerExportCommand(program: Command, labels: ExportLabelOverr
         return;
       }
 
-      const data = readData(config.dataFile);
+      const repository = createActivityRepository(config.dataFile);
+      const data = repository.read();
       const outputPath = resolveOutputPath(output, format);
 
       exportData({ data, format, outputPath, labels: text });

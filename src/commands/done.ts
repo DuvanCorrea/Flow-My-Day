@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import type { Command } from "commander";
+import { createActivityRepository } from "../application/factories/createActivityRepository.js";
 import { readUserConfig } from "../config/userConfig.js";
 import { completeDoneTarget } from "../application/useCases/manageActivities.js";
 import { getHelpText } from "../utils/helpText.js";
@@ -16,7 +17,8 @@ export function registerDoneCommand(program: Command, labels: Partial<DoneComman
     .description(text.description)
     .action((target: string) => {
       const config = readUserConfig();
-      const result = completeDoneTarget(config.dataFile, target);
+      const repository = createActivityRepository(config.dataFile);
+      const result = completeDoneTarget(repository, target);
 
       if (result.kind === "created" || result.kind === "updated") {
         console.log(chalk.green(t(config, "done", { id: result.item.id })));

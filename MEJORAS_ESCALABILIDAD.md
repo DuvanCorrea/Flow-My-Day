@@ -16,7 +16,7 @@ Estados permitidos: Pendiente | En progreso | Bloqueado | Completado
 | ID | Area | Mejora propuesta | Impacto esperado | Primer entregable concreto | Estado | Prioridad |
 |---|---|---|---|---|---|---|
 | SC-001 | Arquitectura | Separar capa de casos de uso (Application) de la capa CLI (commands) | Menos acoplamiento y mas facilidad para agregar comandos/SDK/API | Crear src/application/useCases y mover logica de add/later/debt/done | Completado | Alta |
-| SC-002 | Persistencia | Definir contrato de repositorio (TaskRepository) con adapters | Permite cambiar de JSON a SQLite sin romper comandos | Crear interfaz en src/domain y adapter JSON actual | Pendiente | Alta |
+| SC-002 | Persistencia | Definir contrato de repositorio (TaskRepository) con adapters | Permite cambiar de JSON a SQLite sin romper comandos | Crear interfaz en src/domain y adapter JSON actual | Completado | Alta |
 | SC-003 | Persistencia | Escrituras atomicas y lock de archivo para data.json | Evita corrupcion/perdida en ejecuciones concurrentes | Implementar write atomico (archivo temporal + rename) y lock simple | Pendiente | Alta |
 | SC-004 | Persistencia | Versionado de schema y migraciones de datos | Evolucion segura del modelo en el tiempo | Agregar schemaVersion y carpeta src/storage/migrations | Pendiente | Alta |
 | SC-005 | Escalabilidad | Adapter SQLite opcional para volumen mediano/alto | Mejor rendimiento en listados/filtros y menor riesgo de corrupcion | Adapter SQLite con mismas operaciones de dataStore | Pendiente | Media |
@@ -49,3 +49,4 @@ Actualiza esta tabla cada vez que se complete o inicie una mejora.
 | 2026-04-13 | SC-006 | Completado | Se migra el modelo Activity a src/domain/activity.ts y se tipan sus usos en later/done/debt/dataStore. |
 | 2026-04-13 | SC-006 | Completado | Se completa la migracion full TypeScript del proyecto (bin/src/test), con build a dist, tipado explicito en comandos/utilidades/storage y validacion verde en typecheck, test y help en en/es. |
 | 2026-04-13 | SC-001 | Completado | Se crea la capa src/application/useCases y se mueve la logica de add/later/debt/done fuera de comandos, dejando la CLI como adaptador de entrada/salida. |
+| 2026-04-13 | SC-002 | Completado | Se define el contrato ActivityRepository en dominio, se implementa el adapter JSON y se conecta la capa de comandos/use cases para depender del repositorio en lugar de dataStore directo. |

@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import type { Command } from "commander";
+import { createActivityRepository } from "../application/factories/createActivityRepository.js";
 import { readUserConfig } from "../config/userConfig.js";
 import { addCompletedActivity } from "../application/useCases/manageActivities.js";
 import { getHelpText } from "../utils/helpText.js";
@@ -16,7 +17,8 @@ export function registerAddCommand(program: Command, labels: Partial<AddCommandL
     .description(text.description)
     .action((text: string) => {
       const config = readUserConfig();
-      addCompletedActivity(config.dataFile, text);
+      const repository = createActivityRepository(config.dataFile);
+      addCompletedActivity(repository, text);
       console.log(chalk.green(t(config, "added", { text })));
     });
 }

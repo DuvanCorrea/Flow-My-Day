@@ -1,5 +1,5 @@
-import { addItem, markItemDone } from "../../storage/dataStore.js";
 import type { Activity } from "../../domain/activity.js";
+import type { ActivityRepository } from "../../domain/repositories/activityRepository.js";
 
 // These use cases encapsulate domain behavior for activity creation/completion.
 // CLI commands should stay as thin adapters that parse input and render output.
@@ -24,26 +24,26 @@ function parseItemId(value: string): number | null | undefined {
   return parsed;
 }
 
-export function addCompletedActivity(dataFile: string, text: string): Activity {
-  return addItem(dataFile, { type: "done", text, status: "done" });
+export function addCompletedActivity(repository: ActivityRepository, text: string): Activity {
+  return repository.add({ type: "done", text, status: "done" });
 }
 
-export function addLaterActivity(dataFile: string, text: string): Activity {
-  return addItem(dataFile, { type: "later", text, status: "open" });
+export function addLaterActivity(repository: ActivityRepository, text: string): Activity {
+  return repository.add({ type: "later", text, status: "open" });
 }
 
-export function addDebtActivity(dataFile: string, text: string): Activity {
-  return addItem(dataFile, { type: "debt", text, status: "open" });
+export function addDebtActivity(repository: ActivityRepository, text: string): Activity {
+  return repository.add({ type: "debt", text, status: "open" });
 }
 
 // Resolves the dual-mode done command behavior:
 // - numeric positive target => mark existing item as done
 // - non-numeric target => create a new done activity directly
-export function completeDoneTarget(dataFile: string, target: string): CompleteDoneTargetResult {
+export function completeDoneTarget(repository: ActivityRepository, target: string): CompleteDoneTargetResult {
   const id = parseItemId(target);
 
   if (id === undefined) {
-    const item = addCompletedActivity(dataFile, target);
+    const item = addCompletedActivity(repository, target);
     return { kind: "created", item };
   }
 
@@ -51,7 +51,7 @@ export function completeDoneTarget(dataFile: string, target: string): CompleteDo
     return { kind: "invalid-id", rawTarget: target };
   }
 
-  const item = markItemDone(dataFile, id);
+  const item = repository.markDoneById(id);
   if (!item) {
     return { kind: "not-found", id };
   }

@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import dayjs from "dayjs";
 import type { Command } from "commander";
+import { createActivityRepository } from "../application/factories/createActivityRepository.js";
 import { readUserConfig } from "../config/userConfig.js";
-import { listItems } from "../storage/dataStore.js";
 import type { Activity, ListActivityOptions } from "../domain/activity.js";
 import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
@@ -123,8 +123,9 @@ export function registerListCommand(program: Command, labels: ListLabelOverrides
     .option("--json", text.optionJson, false)
     .action((options: ListCommandOptions) => {
       const config = readUserConfig();
+      const repository = createActivityRepository(config.dataFile);
       const limit = options.limit ? Number(options.limit) : undefined;
-      const items = listItems(config.dataFile, {
+      const items = repository.list({
         type: options.type as ListActivityOptions["type"],
         status: options.status as ListActivityOptions["status"],
         limit

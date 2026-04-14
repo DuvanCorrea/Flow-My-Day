@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import type { Command } from "commander";
+import { createActivityRepository } from "../application/factories/createActivityRepository.js";
 import { readUserConfig } from "../config/userConfig.js";
-import { getStats } from "../storage/dataStore.js";
 import { getHelpText } from "../utils/helpText.js";
 
 const DEFAULT_LABELS = getHelpText("en").commands.stats;
@@ -34,7 +34,8 @@ export function registerStatsCommand(program: Command, labels: StatsLabelOverrid
     .option("--json", text.optionJson, false)
     .action((options: StatsCommandOptions) => {
       const config = readUserConfig();
-      const stats = getStats(config.dataFile);
+      const repository = createActivityRepository(config.dataFile);
+      const stats = repository.getStats();
 
       if (options.json) {
         console.log(JSON.stringify(stats, null, 2));
