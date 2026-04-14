@@ -4,11 +4,12 @@
   "description": "Personal productivity CLI to track completed tasks, later tasks, and technical debt.",
   "type": "module",
   "bin": {
-    "flow": "./dist/bin/flow.js"
+    "flow": "dist/bin/flow.js"
   },
   "main": "dist/src/cli.js",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
+    "prepack": "npm run build",
     "start": "npm run build && node ./dist/bin/flow.js",
     "dev": "npm run build && node ./dist/bin/flow.js",
     "check": "npm run typecheck",
@@ -31,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/DuvanCorrea/Flow-My-Day.git"
+    "url": "git+https://github.com/DuvanCorrea/Flow-My-Day.git"
   },
   "homepage": "https://github.com/DuvanCorrea/Flow-My-Day#readme",
   "bugs": {

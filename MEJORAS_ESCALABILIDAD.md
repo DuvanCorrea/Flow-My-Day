@@ -15,7 +15,7 @@ Estados permitidos: Pendiente | En progreso | Bloqueado | Completado
 
 | ID | Area | Mejora propuesta | Impacto esperado | Primer entregable concreto | Estado | Prioridad |
 |---|---|---|---|---|---|---|
-| SC-001 | Arquitectura | Separar capa de casos de uso (Application) de la capa CLI (commands) | Menos acoplamiento y mas facilidad para agregar comandos/SDK/API | Crear src/application/useCases y mover logica de add/later/debt/done | Pendiente | Alta |
+| SC-001 | Arquitectura | Separar capa de casos de uso (Application) de la capa CLI (commands) | Menos acoplamiento y mas facilidad para agregar comandos/SDK/API | Crear src/application/useCases y mover logica de add/later/debt/done | Completado | Alta |
 | SC-002 | Persistencia | Definir contrato de repositorio (TaskRepository) con adapters | Permite cambiar de JSON a SQLite sin romper comandos | Crear interfaz en src/domain y adapter JSON actual | Pendiente | Alta |
 | SC-003 | Persistencia | Escrituras atomicas y lock de archivo para data.json | Evita corrupcion/perdida en ejecuciones concurrentes | Implementar write atomico (archivo temporal + rename) y lock simple | Pendiente | Alta |
 | SC-004 | Persistencia | Versionado de schema y migraciones de datos | Evolucion segura del modelo en el tiempo | Agregar schemaVersion y carpeta src/storage/migrations | Pendiente | Alta |
@@ -23,7 +23,7 @@ Estados permitidos: Pendiente | En progreso | Bloqueado | Completado
 | SC-006 | Calidad | Estandar de tipado gradual (TypeScript o JSDoc + checkJs) | Menos bugs por tipos y refactors mas seguros | Activar checkJs o migrar utilidades criticas a TypeScript | Completado | Alta |
 | SC-007 | Calidad | ESLint + Prettier + scripts de calidad | Codigo consistente y menor deuda tecnica | Agregar npm run lint, npm run format, npm run typecheck | Pendiente | Alta |
 | SC-008 | Testing | Separar pruebas unitarias e integracion CLI | Feedback mas rapido y cobertura mas profunda | Crear test/unit para storage, i18n, helpText y npmClient | Pendiente | Alta |
-| SC-009 | i18n | Test automatico de paridad en/es y placeholders | Evita regresiones de texto y errores de localizacion | Script que valide claves y placeholders en src/i18n/translations.js | Pendiente | Alta |
+| SC-009 | i18n | Test automatico de paridad en/es y placeholders | Evita regresiones de texto y errores de localizacion | Script que valide claves y placeholders en src/i18n/translations.ts | Pendiente | Alta |
 | SC-010 | Observabilidad | Estandarizar codigos de salida y errores tipados | Integracion mas confiable en CI/scripts externos | Mapa de errores con codigos y util para reportarlos | Pendiente | Media |
 | SC-011 | CI/CD | Pipeline CI (test, lint, typecheck, audit) | Prevencion temprana de regresiones | GitHub Actions con matriz Node LTS | Pendiente | Alta |
 | SC-012 | Release | Automatizar versionado/changelog/publicacion | Entregas mas predecibles y trazables | Integrar Changesets o semantic-release | Pendiente | Media |
@@ -47,3 +47,5 @@ Actualiza esta tabla cada vez que se complete o inicie una mejora.
 | 2026-04-13 | SC-000 | Completado | Se crea este tablero inicial de mejoras. |
 | 2026-04-13 | SC-006 | Completado | Se activa TypeScript en modo gradual con checkJs + script typecheck. |
 | 2026-04-13 | SC-006 | Completado | Se migra el modelo Activity a src/domain/activity.ts y se tipan sus usos en later/done/debt/dataStore. |
+| 2026-04-13 | SC-006 | Completado | Se completa la migracion full TypeScript del proyecto (bin/src/test), con build a dist, tipado explicito en comandos/utilidades/storage y validacion verde en typecheck, test y help en en/es. |
+| 2026-04-13 | SC-001 | Completado | Se crea la capa src/application/useCases y se mueve la logica de add/later/debt/done fuera de comandos, dejando la CLI como adaptador de entrada/salida. |

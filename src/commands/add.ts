@@ -1,8 +1,7 @@
 import chalk from "chalk";
 import type { Command } from "commander";
 import { readUserConfig } from "../config/userConfig.js";
-import { addItem } from "../storage/dataStore.js";
-import type { AddActivityInput } from "../domain/activity.js";
+import { addCompletedActivity } from "../application/useCases/manageActivities.js";
 import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
@@ -17,8 +16,7 @@ export function registerAddCommand(program: Command, labels: Partial<AddCommandL
     .description(text.description)
     .action((text: string) => {
       const config = readUserConfig();
-      const activity: AddActivityInput = { type: "done", text, status: "done" };
-      addItem(config.dataFile, activity);
+      addCompletedActivity(config.dataFile, text);
       console.log(chalk.green(t(config, "added", { text })));
     });
 }

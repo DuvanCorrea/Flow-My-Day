@@ -1,8 +1,7 @@
 import chalk from "chalk";
 import type { Command } from "commander";
 import { readUserConfig } from "../config/userConfig.js";
-import { addItem } from "../storage/dataStore.js";
-import type { AddActivityInput } from "../domain/activity.js";
+import { addDebtActivity } from "../application/useCases/manageActivities.js";
 import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
@@ -17,8 +16,7 @@ export function registerDebtCommand(program: Command, labels: Partial<DebtComman
     .description(text.description)
     .action((text: string) => {
       const config = readUserConfig();
-      const activity: AddActivityInput = { type: "debt", text, status: "open" };
-      addItem(config.dataFile, activity);
+      addDebtActivity(config.dataFile, text);
       console.log(chalk.magenta(t(config, "debt", { text })));
     });
 }

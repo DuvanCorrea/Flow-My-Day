@@ -1,8 +1,7 @@
 import chalk from "chalk";
 import type { Command } from "commander";
 import { readUserConfig } from "../config/userConfig.js";
-import { addItem } from "../storage/dataStore.js";
-import type { AddActivityInput } from "../domain/activity.js";
+import { addLaterActivity } from "../application/useCases/manageActivities.js";
 import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
@@ -17,8 +16,7 @@ export function registerLaterCommand(program: Command, labels: Partial<LaterComm
     .description(text.description)
     .action((text: string) => {
       const config = readUserConfig();
-      const activity: AddActivityInput = { type: "later", text, status: "open" };
-      addItem(config.dataFile, activity);
+      addLaterActivity(config.dataFile, text);
       console.log(chalk.yellow(t(config, "later", { text })));
     });
 }

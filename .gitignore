@@ -3,4 +3,6 @@ node_modules/
 *.log
 *.tmp
 *.corrupt.*
+*.tsbuildinfo
 .DS_Store
+dist/
