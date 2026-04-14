@@ -8,7 +8,19 @@ import { t } from "./messages.js";
 
 let hasHandledFatalError = false;
 
-function toError(value) {
+interface RuntimeConfig {
+  language: string;
+  tone: string;
+}
+
+interface ErrorMeta {
+  source?: string;
+  argv?: string[];
+  cwd?: string;
+  [key: string]: unknown;
+}
+
+function toError(value: unknown): Error {
   if (value instanceof Error) {
     return value;
   }
@@ -16,14 +28,14 @@ function toError(value) {
   return new Error(String(value));
 }
 
-function getFallbackConfig() {
+function getFallbackConfig(): RuntimeConfig {
   return {
     language: "en",
     tone: "friendly"
   };
 }
 
-function getSafeConfig() {
+function getSafeConfig(): RuntimeConfig {
   try {
     return readUserConfig();
   } catch {
@@ -31,13 +43,14 @@ function getSafeConfig() {
   }
 }
 
-function buildLogPayload(error, meta = {}) {
+function buildLogPayload(error: unknown, meta: ErrorMeta = {}): string {
   const details = toError(error);
+  const commandArgs = Array.isArray(meta.argv) ? meta.argv : process.argv;
 
   const lines = [];
   lines.push(`Timestamp: ${new Date().toISOString()}`);
   lines.push(`Source: ${meta.source || "unknown"}`);
-  lines.push(`Command: ${(meta.argv || process.argv).join(" ")}`);
+  lines.push(`Command: ${commandArgs.join(" ")}`);
   lines.push(`CWD: ${meta.cwd || process.cwd()}`);
   lines.push(`Node: ${process.version}`);
   lines.push(`Platform: ${process.platform} ${process.arch}`);
@@ -46,10 +59,10 @@ function buildLogPayload(error, meta = {}) {
   lines.push("Stack:");
   lines.push(details.stack || "(no stack available)");
 
-  const context = { ...meta };
-  delete context.source;
-  delete context.argv;
-  delete context.cwd;
+  const context: Record<string, unknown> = { ...meta };
+  delete context["source"];
+  delete context["argv"];
+  delete context["cwd"];
 
   if (Object.keys(context).length) {
     lines.push("");
@@ -60,7 +73,7 @@ function buildLogPayload(error, meta = {}) {
   return `${lines.join("\n")}\n`;
 }
 
-export function writeErrorLog(error, meta = {}) {
+export function writeErrorLog(error: unknown, meta: ErrorMeta = {}): string {
   const logsDir = path.join(APP_DIR, "logs");
   fs.mkdirSync(logsDir, { recursive: true });
 
@@ -73,14 +86,14 @@ export function writeErrorLog(error, meta = {}) {
   return logPath;
 }
 
-export function reportHandledError(error, meta = {}) {
+export function reportHandledError(error: unknown, meta: ErrorMeta = {}): string {
   const logPath = writeErrorLog(error, meta);
   const config = getSafeConfig();
   console.error(chalk.yellow(t(config, "errorLogPath", { path: logPath })));
   return logPath;
 }
 
-export function handleFatalError(error, meta = {}) {
+export function handleFatalError(error: unknown, meta: ErrorMeta = {}): string | null {
   if (hasHandledFatalError) {
     return null;
   }

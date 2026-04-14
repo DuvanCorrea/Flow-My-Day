@@ -1,8 +1,35 @@
 import fs from "node:fs";
 import path from "node:path";
 import dayjs from "dayjs";
+import type { ActivityStatus, FlowData } from "../domain/activity.js";
 
-const DEFAULT_MARKDOWN_LABELS = {
+interface MarkdownStatusLabels {
+  done: string;
+  open: string;
+}
+
+interface MarkdownLabels {
+  markdownTitle: string;
+  markdownGenerated: string;
+  markdownEmpty: string;
+  markdownSectionDone: string;
+  markdownSectionLater: string;
+  markdownSectionDebt: string;
+  markdownStatus: MarkdownStatusLabels;
+}
+
+type MarkdownLabelOverrides = Partial<Omit<MarkdownLabels, "markdownStatus">> & {
+  markdownStatus?: Partial<MarkdownStatusLabels>;
+};
+
+interface ExportPayload {
+  data: FlowData;
+  format: string;
+  outputPath: string;
+  labels: MarkdownLabelOverrides;
+}
+
+const DEFAULT_MARKDOWN_LABELS: MarkdownLabels = {
   markdownTitle: "Flow Daily Log",
   markdownGenerated: "Generated",
   markdownEmpty: "No items.",
@@ -15,29 +42,29 @@ const DEFAULT_MARKDOWN_LABELS = {
   }
 };
 
-function ensureOutputDirectory(filePath) {
+function ensureOutputDirectory(filePath: string): void {
   const directory = path.dirname(filePath);
   if (!fs.existsSync(directory)) {
     fs.mkdirSync(directory, { recursive: true });
   }
 }
 
-function mergeMarkdownLabels(labels = {}) {
+function mergeMarkdownLabels(labels: MarkdownLabelOverrides = {}): MarkdownLabels {
   return {
     ...DEFAULT_MARKDOWN_LABELS,
     ...labels,
     markdownStatus: {
       ...DEFAULT_MARKDOWN_LABELS.markdownStatus,
-      ...(labels.markdownStatus || {})
+      ...(labels.markdownStatus ?? {})
     }
   };
 }
 
-function mapStatus(status, labels) {
+function mapStatus(status: ActivityStatus, labels: MarkdownLabels): string {
   return labels.markdownStatus[status] || status;
 }
 
-export function toMarkdown(data, labelsInput = {}) {
+export function toMarkdown(data: FlowData, labelsInput: MarkdownLabelOverrides = {}): string {
   const labels = mergeMarkdownLabels(labelsInput);
   const lines = [];
   lines.push(`# ${labels.markdownTitle}`);
@@ -77,7 +104,7 @@ export function toMarkdown(data, labelsInput = {}) {
   return `${lines.join("\n")}\n`;
 }
 
-export function exportData({ data, format, outputPath, labels }) {
+export function exportData({ data, format, outputPath, labels }: ExportPayload): string {
   ensureOutputDirectory(outputPath);
 
   if (format === "json") {

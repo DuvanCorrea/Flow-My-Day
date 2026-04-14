@@ -4,16 +4,18 @@
   "description": "Personal productivity CLI to track completed tasks, later tasks, and technical debt.",
   "type": "module",
   "bin": {
-    "flow": "./bin/flow.js"
+    "flow": "./dist/bin/flow.js"
   },
-  "main": "src/cli.js",
+  "main": "dist/src/cli.js",
   "scripts": {
-    "start": "node ./bin/flow.js",
-    "dev": "node ./bin/flow.js",
-    "check": "node --check ./src/cli.js",
-    "help": "node ./bin/flow.js --help",
-    "test": "node --test \"test/**/*.test.js\"",
-    "test:watch": "node --test --watch \"test/**/*.test.js\""
+    "build": "tsc --project tsconfig.build.json",
+    "start": "npm run build && node ./dist/bin/flow.js",
+    "dev": "npm run build && node ./dist/bin/flow.js",
+    "check": "npm run typecheck",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "help": "npm run build && node ./dist/bin/flow.js --help",
+    "test": "npm run build && node --test \"dist/test/**/*.test.js\"",
+    "test:watch": "npm run build && node --test --watch \"dist/test/**/*.test.js\""
   },
   "keywords": [
     "cli",
@@ -36,8 +38,7 @@
     "url": "https://github.com/DuvanCorrea/Flow-My-Day/issues"
   },
   "files": [
-    "bin",
-    "src",
+    "dist",
     "README.md",
     "LICENSE"
   ],
@@ -45,5 +46,9 @@
     "chalk": "^5.4.1",
     "commander": "^12.1.0",
     "dayjs": "^1.11.18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.2",
+    "typescript": "^5.8.3"
   }
 }

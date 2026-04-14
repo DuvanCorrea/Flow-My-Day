@@ -195,7 +195,7 @@ test("config set/get persists preferences", (t) => {
   assert.equal(stripAnsi(getResult.stdout).trim(), "en");
 
   const configPath = path.join(sandbox.home, ".flow", "config.json");
-  const config = readJson(configPath);
+  const config = readJson<{ language: string }>(configPath);
   assert.equal(config.language, "en");
 });
 

@@ -5,7 +5,7 @@ import { reportHandledError } from "../utils/errorHandler.js";
 import { getAvailableVersions } from "../utils/npmClient.js";
 
 const require = createRequire(import.meta.url);
-const { name: packageName, version: currentVersion } = require("../../package.json");
+const { name: packageName, version: currentVersion } = require("../../../package.json");
 
 const DEFAULT_LABELS = getHelpText("en").commands.versions;
 

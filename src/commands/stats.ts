@@ -1,29 +1,38 @@
 import chalk from "chalk";
+import type { Command } from "commander";
 import { readUserConfig } from "../config/userConfig.js";
 import { getStats } from "../storage/dataStore.js";
 import { getHelpText } from "../utils/helpText.js";
 
 const DEFAULT_LABELS = getHelpText("en").commands.stats;
+type StatsLabels = typeof DEFAULT_LABELS;
+type StatsLabelOverrides = Partial<Omit<StatsLabels, "typeNames">> & {
+  typeNames?: Partial<StatsLabels["typeNames"]>;
+};
 
-function mergeLabels(labels = {}) {
+interface StatsCommandOptions {
+  json?: boolean;
+}
+
+function mergeLabels(labels: StatsLabelOverrides = {}): StatsLabels {
   return {
     ...DEFAULT_LABELS,
     ...labels,
     typeNames: {
       ...DEFAULT_LABELS.typeNames,
-      ...(labels.typeNames || {})
+      ...(labels.typeNames ?? {})
     }
   };
 }
 
-export function registerStatsCommand(program, labels = {}) {
+export function registerStatsCommand(program: Command, labels: StatsLabelOverrides = {}): void {
   const text = mergeLabels(labels);
 
   program
     .command("stats")
     .description(text.description)
     .option("--json", text.optionJson, false)
-    .action((options) => {
+    .action((options: StatsCommandOptions) => {
       const config = readUserConfig();
       const stats = getStats(config.dataFile);
 

@@ -2,19 +2,31 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import type { SpawnSyncReturns } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
 
+interface Sandbox {
+  root: string;
+  home: string;
+  cwd: string;
+}
+
+interface RunFlowOptions {
+  env?: NodeJS.ProcessEnv;
+  cwd?: string;
+}
+
 // Removes ANSI escape sequences so string assertions are deterministic.
-export function stripAnsi(value) {
+export function stripAnsi(value: unknown): string {
   return String(value || "").replace(/\u001b\[[0-9;]*m/g, "");
 }
 
 // Creates an isolated HOME and CWD per test to avoid cross-test interference.
-export function createSandbox(prefix = "flow-test-") {
+export function createSandbox(prefix = "flow-test-"): Sandbox {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
   const home = path.join(root, "home");
   const cwd = path.join(root, "workspace");
@@ -26,12 +38,12 @@ export function createSandbox(prefix = "flow-test-") {
 }
 
 // Cleans up the temporary sandbox after each test run.
-export function removeSandbox(rootPath) {
+export function removeSandbox(rootPath: string): void {
   fs.rmSync(rootPath, { recursive: true, force: true });
 }
 
 // Forces the CLI to use the sandbox home directory for ~/.flow files.
-export function buildHomeEnv(homePath) {
+export function buildHomeEnv(homePath: string): NodeJS.ProcessEnv {
   return {
     ...process.env,
     HOME: homePath,
@@ -40,7 +52,7 @@ export function buildHomeEnv(homePath) {
 }
 
 // Executes the flow CLI as a child process and returns stdout/stderr/status.
-export function runFlow(args, options = {}) {
+export function runFlow(args: string[], options: RunFlowOptions = {}): SpawnSyncReturns<string> {
   const { env, cwd = PROJECT_ROOT } = options;
 
   return spawnSync(process.execPath, [path.join(PROJECT_ROOT, "bin", "flow.js"), ...args], {
@@ -51,7 +63,7 @@ export function runFlow(args, options = {}) {
 }
 
 // Reads and parses JSON files used in assertions.
-export function readJson(filePath) {
+export function readJson<T = unknown>(filePath: string): T {
   const raw = fs.readFileSync(filePath, "utf8");
-  return JSON.parse(raw);
+  return JSON.parse(raw) as T;
 }

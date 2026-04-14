@@ -18,7 +18,7 @@ import { registerVersionsCommand } from "./commands/versions.js";
 import { registerUpdateCommand } from "./commands/update.js";
 
 const require = createRequire(import.meta.url);
-const { version } = require("../package.json");
+const { version } = require("../../package.json");
 
 export function buildProgram() {
   const config = readUserConfig();

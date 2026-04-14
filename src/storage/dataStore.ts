@@ -1,12 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
 import dayjs from "dayjs";
+import type {
+  Activity,
+  ActivityStats,
+  AddActivityInput,
+  FlowData,
+  ListActivityOptions
+} from "../domain/activity.js";
 
-function nowIso() {
+function nowIso(): string {
   return dayjs().toISOString();
 }
 
-function createInitialData() {
+function createInitialData(): FlowData {
   const timestamp = nowIso();
 
   return {
@@ -20,14 +27,23 @@ function createInitialData() {
   };
 }
 
-function ensureParentDir(filePath) {
+function ensureParentDir(filePath: string): void {
   const directory = path.dirname(filePath);
   if (!fs.existsSync(directory)) {
     fs.mkdirSync(directory, { recursive: true });
   }
 }
 
-export function ensureDataFile(dataFile) {
+function isFlowData(value: unknown): value is FlowData {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const parsed = value as FlowData;
+  return Boolean(parsed.meta && Array.isArray(parsed.items));
+}
+
+export function ensureDataFile(dataFile: string): void {
   ensureParentDir(dataFile);
 
   if (!fs.existsSync(dataFile)) {
@@ -36,14 +52,14 @@ export function ensureDataFile(dataFile) {
   }
 }
 
-export function readData(dataFile) {
+export function readData(dataFile: string): FlowData {
   ensureDataFile(dataFile);
 
   const raw = fs.readFileSync(dataFile, "utf8");
 
   try {
-    const parsed = JSON.parse(raw);
-    if (!parsed.meta || !Array.isArray(parsed.items)) {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!isFlowData(parsed)) {
       throw new Error("Invalid data schema");
     }
 
@@ -57,8 +73,8 @@ export function readData(dataFile) {
   }
 }
 
-export function writeData(dataFile, data) {
-  const payload = {
+export function writeData(dataFile: string, data: FlowData): FlowData {
+  const payload: FlowData = {
     ...data,
     meta: {
       ...data.meta,
@@ -70,9 +86,9 @@ export function writeData(dataFile, data) {
   return payload;
 }
 
-export function addItem(dataFile, { type, text, status }) {
+export function addItem(dataFile: string, { type, text, status }: AddActivityInput): Activity {
   const data = readData(dataFile);
-  const item = {
+  const item: Activity = {
     id: data.meta.nextId,
     type,
     text,
@@ -88,7 +104,7 @@ export function addItem(dataFile, { type, text, status }) {
   return item;
 }
 
-export function markItemDone(dataFile, itemId) {
+export function markItemDone(dataFile: string, itemId: number | string): Activity | null {
   const data = readData(dataFile);
   const id = Number(itemId);
 
@@ -110,7 +126,7 @@ export function markItemDone(dataFile, itemId) {
   return item;
 }
 
-export function listItems(dataFile, options = {}) {
+export function listItems(dataFile: string, options: ListActivityOptions = {}): Activity[] {
   const { type = "all", status = "all", limit } = options;
   const data = readData(dataFile);
 
@@ -127,9 +143,9 @@ export function listItems(dataFile, options = {}) {
   return filtered;
 }
 
-export function getStats(dataFile) {
+export function getStats(dataFile: string): ActivityStats {
   const data = readData(dataFile);
-  const stats = {
+  const stats: ActivityStats = {
     total: data.items.length,
     done: 0,
     open: 0,
@@ -147,7 +163,7 @@ export function getStats(dataFile) {
       stats.open += 1;
     }
 
-    if (stats.byType[item.type] !== undefined) {
+    if (item.type === "done" || item.type === "later" || item.type === "debt") {
       stats.byType[item.type] += 1;
     }
   }
