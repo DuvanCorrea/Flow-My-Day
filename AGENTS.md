@@ -23,6 +23,7 @@ This includes, but is not limited to:
 4. Use `t(config, key, vars)` for runtime messages.
 5. If a new text is added, add it for both `en` and `es` in `src/i18n/translations.js`.
 6. Keep placeholders stable across languages (example: `{version}`, `{package}`, `{error}`).
+7. Always update README.md if is necesary
 
 ## Implementation Pattern
 

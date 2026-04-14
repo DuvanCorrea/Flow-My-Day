@@ -40,18 +40,32 @@ export const TRANSLATIONS = {
         helpSections: {
           usage: "Usage",
           options: "Options",
-          commands: "Commands"
+          commands: "Commands",
+          commandGroups: {
+            capture: "Capture",
+            review: "Review",
+            manage: "Manage",
+            other: "Other"
+          }
         },
         examplesTitle: "Examples",
         examples: [
           'flow add "Fix login bug"',
-          'flow later "Write onboarding docs"',
+          'flow later "Prepare sprint demo"',
           'flow debt "Split monolithic payment handler"',
-          "flow list --status open",
           "flow done 4",
-          "flow stats",
+          'flow done "Close postmortem notes"',
+          "flow list --type later --status open --limit 5",
+          "flow stats --json",
           "flow export ./reports/today.md -f md",
           "flow config set language en"
+        ],
+        tipsTitle: "Quick tips",
+        tips: [
+          "Use quotes when text has spaces.",
+          "done <id> completes an existing item.",
+          'done "<text>" creates a completed item directly.',
+          "Use flow help <command> for command-specific help."
         ]
       },
       commands: {
@@ -187,18 +201,32 @@ export const TRANSLATIONS = {
         helpSections: {
           usage: "Uso",
           options: "Opciones",
-          commands: "Comandos"
+          commands: "Comandos",
+          commandGroups: {
+            capture: "Captura",
+            review: "Revision",
+            manage: "Gestion",
+            other: "Otros"
+          }
         },
         examplesTitle: "Ejemplos",
         examples: [
           'flow add "Corregir bug de login"',
-          'flow later "Escribir documentacion de onboarding"',
+          'flow later "Preparar demo del sprint"',
           'flow debt "Separar handler monolitico de pagos"',
-          "flow list --status open",
           "flow done 4",
-          "flow stats",
+          'flow done "Cerrar notas de postmortem"',
+          "flow list --type later --status open --limit 5",
+          "flow stats --json",
           "flow export ./reports/hoy.md -f md",
           "flow config set language es"
+        ],
+        tipsTitle: "Tips rapidos",
+        tips: [
+          "Usa comillas cuando el texto tenga espacios.",
+          "done <id> completa un item existente.",
+          'done "<texto>" crea un item completado directamente.',
+          "Usa flow help <command> para ver ayuda especifica."
         ]
       },
       commands: {

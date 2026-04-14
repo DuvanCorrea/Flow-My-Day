@@ -17,10 +17,12 @@ flow --help
 
 ```bash
 flow add "Cerrado bug de login"
-flow later "Preparar release notes"
+flow later "Preparar demo del sprint"
 flow debt "Refactorizar modulo de pagos"
-flow list
-flow stats
+flow done 4
+flow done "Cerrar notas de postmortem"
+flow list --type later --status open --limit 5
+flow stats --json
 ```
 
 ## Resumen de comandos

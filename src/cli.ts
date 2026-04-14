@@ -38,7 +38,15 @@ export function buildProgram() {
     formatHelp: (cmd, helper) => formatLocalizedHelp(cmd, helper, helpText.cli.helpSections)
   });
 
-  program.addHelpText("after", buildExamplesHelp(helpText.cli.examplesTitle, helpText.cli.examples));
+  program.addHelpText(
+    "after",
+    buildExamplesHelp(
+      helpText.cli.examplesTitle,
+      helpText.cli.examples,
+      helpText.cli.tipsTitle,
+      helpText.cli.tips
+    )
+  );
 
   registerAddCommand(program, helpText.commands.add);
   registerLaterCommand(program, helpText.commands.later);
