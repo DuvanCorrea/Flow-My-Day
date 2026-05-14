@@ -17,11 +17,26 @@ flow --help
 
 ```bash
 flow add "Cerrado bug de login"
+flow add "Migrar checkout" --project "Payments"
 flow later "Preparar demo del sprint"
 flow debt "Refactorizar modulo de pagos"
 flow done 4
 flow done "Cerrar notas de postmortem"
+flow edit 2 --new "Preparar demo del sprint + checklist"
+flow project list
+flow project add "Core"
+flow project rename 1 "Payments API"
+flow project remove 1
+flow remove 3
+flow undo
 flow list --type later --status open --limit 5
+flow list --project "Payments"
+flow list --today
+flow list --week
+flow list --month
+flow list --date "2026-04-13"
+flow list --from "2026-04-01" --to "2026-04-13"
+flow stats --project "Payments" --week --json
 flow stats --json
 ```
 
@@ -37,8 +52,16 @@ flow stats --json
 | `flow add <text>` | Registra una tarea completada |
 | `flow later <text>` | Registra una tarea para despues |
 | `flow debt <text>` | Registra deuda tecnica |
+| `flow edit <id> --new <text>` | Edita el texto de una actividad |
 | `flow list` | Lista items por seccion con color y emoji |
 | `flow done <id|text>` | Marca un item por id como completado, o crea uno nuevo como completado |
+| `flow project` | Gestiona proyectos |
+| `flow project list` | Lista proyectos |
+| `flow project add <name>` | Crea un proyecto |
+| `flow project rename <id> <name>` | Renombra un proyecto |
+| `flow project remove <id>` | Elimina un proyecto y deja actividades huerfanas |
+| `flow remove <id>` | Elimina una actividad por id |
+| `flow undo` | Deshace el ultimo cambio de datos |
 | `flow stats` | Muestra estadisticas rapidas |
 | `flow export [output]` | Exporta a JSON o Markdown |
 | `flow config` | Muestra configuracion actual |
@@ -55,10 +78,36 @@ flow stats --json
 - `-t, --type <type>`: `done|later|debt|all`
 - `-s, --status <status>`: `open|done|all`
 - `-l, --limit <number>`: limitar resultados
+- `-p, --project <project>`: filtrar por proyecto (id o nombre)
+- `--today`: solo actividades creadas hoy
+- `--week`: solo actividades de los ultimos 7 dias
+- `--month`: solo actividades del mes actual
+- `-d, --date <AAAA-MM-DD>`: solo actividades de una fecha puntual
+- `--from <AAAA-MM-DD>`: solo actividades desde fecha (incluida)
+- `--to <AAAA-MM-DD>`: solo actividades hasta fecha (incluida)
 - `--json`: salida en JSON
+
+### flow add / later / debt / done
+
+- `-p, --project <project>`: asigna proyecto por id o nombre (si no existe por nombre, se crea)
+
+### flow edit
+
+- `-n, --new <text>`: nuevo texto para la actividad
+
+### flow project
+
+- `--json`: salida en JSON (para `flow project list`)
 
 ### flow stats
 
+- `-p, --project <project>`: filtrar por proyecto (id o nombre)
+- `--today`: solo actividades creadas hoy
+- `--week`: solo actividades de los ultimos 7 dias
+- `--month`: solo actividades del mes actual
+- `-d, --date <AAAA-MM-DD>`: solo actividades de una fecha puntual
+- `--from <AAAA-MM-DD>`: solo actividades desde fecha (incluida)
+- `--to <AAAA-MM-DD>`: solo actividades hasta fecha (incluida)
 - `--json`: salida en JSON
 
 ### flow export
@@ -86,6 +135,8 @@ flow update
 flow update 1.1.0
 flow update --dry-run
 ```
+
+<!-- Local PowerShell helper scripts removed from documentation. -->
 
 ## Logs de error
 
