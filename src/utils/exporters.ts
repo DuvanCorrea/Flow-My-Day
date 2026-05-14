@@ -16,6 +16,8 @@ interface MarkdownLabels {
   markdownSectionLater: string;
   markdownSectionDebt: string;
   markdownStatus: MarkdownStatusLabels;
+  markdownProjectLabel: string;
+  markdownProjectNone: string;
 }
 
 type MarkdownLabelOverrides = Partial<Omit<MarkdownLabels, "markdownStatus">> & {
@@ -36,6 +38,8 @@ const DEFAULT_MARKDOWN_LABELS: MarkdownLabels = {
   markdownSectionDone: "Done",
   markdownSectionLater: "Later",
   markdownSectionDebt: "Technical Debt",
+  markdownProjectLabel: "project",
+  markdownProjectNone: "none",
   markdownStatus: {
     done: "done",
     open: "open"
@@ -64,6 +68,15 @@ function mapStatus(status: ActivityStatus, labels: MarkdownLabels): string {
   return labels.markdownStatus[status] || status;
 }
 
+function mapProject(projectId: number | null, data: FlowData, labels: MarkdownLabels): string {
+  if (!projectId) {
+    return labels.markdownProjectNone;
+  }
+
+  const project = data.projects.find((entry) => entry.id === projectId);
+  return project ? project.name : labels.markdownProjectNone;
+}
+
 export function toMarkdown(data: FlowData, labelsInput: MarkdownLabelOverrides = {}): string {
   const labels = mergeMarkdownLabels(labelsInput);
   const lines = [];
@@ -85,19 +98,25 @@ export function toMarkdown(data: FlowData, labelsInput: MarkdownLabelOverrides =
 
   lines.push(`## ${labels.markdownSectionDone}`);
   for (const item of groups.done) {
-    lines.push(`- #${item.id} ${item.text} (${item.createdAt})`);
+    lines.push(
+      `- #${item.id} ${item.text} (${item.createdAt}) [${labels.markdownProjectLabel}: ${mapProject(item.projectId, data, labels)}]`
+    );
   }
   lines.push("");
 
   lines.push(`## ${labels.markdownSectionLater}`);
   for (const item of groups.later) {
-    lines.push(`- #${item.id} ${item.text} [${mapStatus(item.status, labels)}]`);
+    lines.push(
+      `- #${item.id} ${item.text} [${mapStatus(item.status, labels)}] [${labels.markdownProjectLabel}: ${mapProject(item.projectId, data, labels)}]`
+    );
   }
   lines.push("");
 
   lines.push(`## ${labels.markdownSectionDebt}`);
   for (const item of groups.debt) {
-    lines.push(`- #${item.id} ${item.text} [${mapStatus(item.status, labels)}]`);
+    lines.push(
+      `- #${item.id} ${item.text} [${mapStatus(item.status, labels)}] [${labels.markdownProjectLabel}: ${mapProject(item.projectId, data, labels)}]`
+    );
   }
   lines.push("");
 

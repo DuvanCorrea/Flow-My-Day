@@ -6,6 +6,7 @@ import { readUserConfig } from "../config/userConfig.js";
 import type { Activity, ListActivityOptions } from "../domain/activity.js";
 import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
+import { applyActivityFilters, resolveActivityFilters } from "../utils/activityFilters.js";
 
 const DEFAULT_LABELS = getHelpText("en").commands.list;
 type ListLabels = typeof DEFAULT_LABELS;
@@ -19,6 +20,13 @@ interface ListCommandOptions {
   type?: string;
   status?: string;
   limit?: string;
+  project?: string;
+  today?: boolean;
+  week?: boolean;
+  month?: boolean;
+  date?: string;
+  from?: string;
+  to?: string;
   json?: boolean;
 }
 
@@ -27,6 +35,10 @@ interface TypeStyle {
   emoji: string;
   color: (value: string) => string;
 }
+
+type RenderListLabels = ListLabels & {
+  projectsById: Map<number, string>;
+};
 
 const TYPE_ORDER: SectionType[] = ["later", "done", "debt"];
 
@@ -82,7 +94,7 @@ function formatTimestamp(value: string, unknownTimeLabel: string): string {
   return parsed.isValid() ? parsed.format("YYYY-MM-DD HH:mm:ss") : unknownTimeLabel;
 }
 
-function renderGroupedItems(items: Activity[], labels: ListLabels): void {
+function renderGroupedItems(items: Activity[], labels: RenderListLabels): void {
   const groupedItems = groupItemsByType(items);
   const renderOrder = buildRenderOrder(groupedItems);
   let hasPrintedSection = false;
@@ -106,7 +118,9 @@ function renderGroupedItems(items: Activity[], labels: ListLabels): void {
         ? chalk.green(labels.status.done)
         : chalk.yellow(labels.status.open);
       const createdAt = chalk.gray(`[${formatTimestamp(item.createdAt, labels.unknownTime)}]`);
-      console.log("  -", style.color(`#${item.id}`), statusTag, item.text, createdAt);
+      const projectName = item.projectId ? labels.projectsById.get(item.projectId) || labels.projectNone : labels.projectNone;
+      const projectTag = chalk.cyan(`[${labels.projectLabel}: ${projectName}]`);
+      console.log("  -", style.color(`#${item.id}`), statusTag, item.text, projectTag, createdAt);
     }
   }
 }
@@ -120,16 +134,56 @@ export function registerListCommand(program: Command, labels: ListLabelOverrides
     .option("-t, --type <type>", text.optionType, "all")
     .option("-s, --status <status>", text.optionStatus, "all")
     .option("-l, --limit <number>", text.optionLimit)
+    .option("-p, --project <project>", text.optionProject)
+    .option("--today", text.optionToday, false)
+    .option("--week", text.optionWeek, false)
+    .option("--month", text.optionMonth, false)
+    .option("-d, --date <YYYY-MM-DD>", text.optionDate)
+    .option("--from <YYYY-MM-DD>", text.optionFrom)
+    .option("--to <YYYY-MM-DD>", text.optionTo)
     .option("--json", text.optionJson, false)
     .action((options: ListCommandOptions) => {
       const config = readUserConfig();
       const repository = createActivityRepository(config.dataFile);
+      const data = repository.read();
+      const projectsById = new Map<number, string>(data.projects.map((project) => [project.id, project.name]));
+
+      const filterResult = resolveActivityFilters(options, data.projects);
+      if (filterResult.kind === "date-filter-conflict") {
+        console.log(chalk.red(t(config, "listDateFilterConflict")));
+        process.exitCode = 1;
+        return;
+      }
+
+      if (filterResult.kind === "invalid-date") {
+        console.log(chalk.red(t(config, "invalidDate", { date: filterResult.value })));
+        process.exitCode = 1;
+        return;
+      }
+
+      if (filterResult.kind === "invalid-date-range") {
+        console.log(chalk.red(t(config, "invalidDateRange", { from: filterResult.from, to: filterResult.to })));
+        process.exitCode = 1;
+        return;
+      }
+
+      if (filterResult.kind === "project-not-found") {
+        console.log(chalk.red(t(config, "projectNotFound", { project: filterResult.reference })));
+        process.exitCode = 1;
+        return;
+      }
+
       const limit = options.limit ? Number(options.limit) : undefined;
-      const items = repository.list({
+      let items = repository.list({
         type: options.type as ListActivityOptions["type"],
-        status: options.status as ListActivityOptions["status"],
-        limit
+        status: options.status as ListActivityOptions["status"]
       });
+
+      items = applyActivityFilters(items, filterResult.filters);
+
+      if (typeof limit === "number" && Number.isFinite(limit) && limit > 0) {
+        items = items.slice(0, limit);
+      }
 
       if (options.json) {
         console.log(JSON.stringify(items, null, 2));
@@ -141,6 +195,6 @@ export function registerListCommand(program: Command, labels: ListLabelOverrides
         return;
       }
 
-      renderGroupedItems(items, text);
+      renderGroupedItems(items, { ...text, projectsById });
     });
 }

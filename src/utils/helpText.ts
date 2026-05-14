@@ -73,7 +73,7 @@ function buildGroupedCommandsSection(title: string, rows: CommandRow[], labels: 
   const groups = [
     {
       label: labels.capture || "Capture",
-      commands: new Set(["add", "later", "debt", "done"])
+      commands: new Set(["add", "later", "debt", "done", "edit"])
     },
     {
       label: labels.review || "Review",
@@ -81,7 +81,7 @@ function buildGroupedCommandsSection(title: string, rows: CommandRow[], labels: 
     },
     {
       label: labels.manage || "Manage",
-      commands: new Set(["config", "versions", "update", "help"])
+      commands: new Set(["config", "project", "remove", "undo", "versions", "update", "help"])
     }
   ];
 
@@ -153,7 +153,8 @@ export function formatLocalizedHelp(cmd, helper, sections: HelpSections = {}) {
     lines.push(...optionLines);
   }
 
-  const commandLines = labels.commandGroups
+  const isTopLevelCommand = typeof cmd?.name === "function" && cmd.name() === "flow";
+  const commandLines = labels.commandGroups && isTopLevelCommand
     ? buildGroupedCommandsSection(labels.commands, commands, labels.commandGroups)
     : buildAlignedSection(labels.commands, commands);
   if (commandLines.length) {

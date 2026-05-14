@@ -136,8 +136,6 @@ flow update 1.1.0
 flow update --dry-run
 ```
 
-<!-- Local PowerShell helper scripts removed from documentation. -->
-
 ## Logs de error
 
 Si un comando falla, Flow guarda un archivo de error y muestra la ruta en consola.

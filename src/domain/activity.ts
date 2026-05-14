@@ -9,8 +9,15 @@ export interface Activity {
   type: ActivityType;
   text: string;
   status: ActivityStatus;
+  projectId: number | null;
   createdAt: string;
   doneAt: string | null;
+}
+
+export interface Project {
+  id: number;
+  name: string;
+  createdAt: string;
 }
 
 export interface FlowDataMeta {
@@ -18,17 +25,20 @@ export interface FlowDataMeta {
   createdAt: string;
   updatedAt: string;
   nextId: number;
+  nextProjectId: number;
 }
 
 export interface FlowData {
   meta: FlowDataMeta;
   items: Activity[];
+  projects: Project[];
 }
 
 export interface AddActivityInput {
   type: ActivityType;
   text: string;
   status: ActivityStatus;
+  projectId?: number | null;
 }
 
 export interface ListActivityOptions {

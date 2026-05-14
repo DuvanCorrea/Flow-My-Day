@@ -14,6 +14,10 @@ import { registerDoneCommand } from "./commands/done.js";
 import { registerStatsCommand } from "./commands/stats.js";
 import { registerExportCommand } from "./commands/export.js";
 import { registerConfigCommand } from "./commands/config.js";
+import { registerEditCommand } from "./commands/edit.js";
+import { registerRemoveCommand } from "./commands/remove.js";
+import { registerProjectCommand } from "./commands/project.js";
+import { registerUndoCommand } from "./commands/undo.js";
 import { registerVersionsCommand } from "./commands/versions.js";
 import { registerUpdateCommand } from "./commands/update.js";
 
@@ -53,6 +57,10 @@ export function buildProgram() {
   registerDebtCommand(program, helpText.commands.debt);
   registerListCommand(program, helpText.commands.list);
   registerDoneCommand(program, helpText.commands.done);
+  registerEditCommand(program, helpText.commands.edit);
+  registerRemoveCommand(program, helpText.commands.remove);
+  registerProjectCommand(program, helpText.commands.project);
+  registerUndoCommand(program, helpText.commands.undo);
   registerStatsCommand(program, helpText.commands.stats);
   registerExportCommand(program, helpText.commands.export);
   registerConfigCommand(program, helpText.commands.config);
@@ -62,7 +70,18 @@ export function buildProgram() {
   return program;
 }
 
-export function run(argv = process.argv) {
+function normalizeLegacyOptionSyntax(argv: string[]): string[] {
+  return argv.map((arg) => {
+    if (arg === "-new") return "--new";
+    if (arg === "-project") return "--project";
+    if (arg === "-date") return "--date";
+    if (arg === "-from") return "--from";
+    if (arg === "-to") return "--to";
+    return arg;
+  });
+}
+
+export async function run(argv = process.argv) {
   const program = buildProgram();
-  program.parse(argv);
+  await program.parseAsync(normalizeLegacyOptionSyntax(argv));
 }

@@ -3,11 +3,16 @@ import type { Command } from "commander";
 import { createActivityRepository } from "../application/factories/createActivityRepository.js";
 import { readUserConfig } from "../config/userConfig.js";
 import { addLaterActivity } from "../application/useCases/manageActivities.js";
+import { resolveProjectSelectionForCreation } from "../application/useCases/resolveProjectSelection.js";
 import { getHelpText } from "../utils/helpText.js";
 import { t } from "../utils/messages.js";
 
 const DEFAULT_LABELS = getHelpText("en").commands.later;
 type LaterCommandLabels = typeof DEFAULT_LABELS;
+
+interface LaterCommandOptions {
+  project?: string;
+}
 
 export function registerLaterCommand(program: Command, labels: Partial<LaterCommandLabels> = {}): void {
   const text: LaterCommandLabels = { ...DEFAULT_LABELS, ...labels };
@@ -15,10 +20,18 @@ export function registerLaterCommand(program: Command, labels: Partial<LaterComm
   program
     .command("later <text>")
     .description(text.description)
-    .action((text: string) => {
+    .option("-p, --project <project>", text.optionProject)
+    .action(async (text: string, options: LaterCommandOptions) => {
       const config = readUserConfig();
       const repository = createActivityRepository(config.dataFile);
-      addLaterActivity(repository, text);
+      const projectSelection = await resolveProjectSelectionForCreation(repository, config, options.project);
+      if (projectSelection.kind === "invalid-reference") {
+        console.log(chalk.red(t(config, "projectNotFound", { project: projectSelection.reference })));
+        process.exitCode = 1;
+        return;
+      }
+
+      addLaterActivity(repository, text, projectSelection.projectId);
       console.log(chalk.yellow(t(config, "later", { text })));
     });
 }

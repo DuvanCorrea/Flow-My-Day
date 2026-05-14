@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import dayjs from "dayjs";
 import {
   buildHomeEnv,
   createSandbox,
@@ -25,9 +26,11 @@ test("help shows core commands", (t) => {
 
   assert.equal(result.status, 0);
   const output = combineOutput(result);
-  assert.match(output, /add <text>/);
-  assert.match(output, /later <text>/);
-  assert.match(output, /debt <text>/);
+  assert.match(output, /add \[options\] <text>/);
+  assert.match(output, /later \[options\] <text>/);
+  assert.match(output, /debt \[options\] <text>/);
+  assert.match(output, /edit \[options\] <id>/);
+  assert.match(output, /project\s+Manage projects/);
   assert.match(output, /stats/);
   assert.match(output, /config/);
   assert.match(output, /versions/);
@@ -290,4 +293,305 @@ test("rejects invalid export format", (t) => {
 
   assert.notEqual(result.status, 0);
   assert.match(combineOutput(result), /Invalid format/);
+});
+
+// Ensures edit updates the text of an existing activity by id.
+test("edit updates activity text", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["later", "Initial text"], { env }).status, 0);
+
+  const editResult = runFlow(["edit", "1", "--new", "Updated text"], { env });
+  assert.equal(editResult.status, 0, combineOutput(editResult));
+
+  const listResult = runFlow(["list", "--json"], { env });
+  assert.equal(listResult.status, 0, combineOutput(listResult));
+
+  const items = JSON.parse(stripAnsi(listResult.stdout).trim());
+  assert.equal(items.length, 1);
+  assert.equal(items[0].id, 1);
+  assert.equal(items[0].text, "Updated text");
+});
+
+// Verifies project assignment on creation and orphan behavior after project removal.
+test("projects assign on create and orphan on remove", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const addResult = runFlow(["add", "Ship billing migration", "--project", "Billing"], { env });
+  assert.equal(addResult.status, 0, combineOutput(addResult));
+
+  const projectsAfterCreate = runFlow(["project", "list", "--json"], { env });
+  assert.equal(projectsAfterCreate.status, 0, combineOutput(projectsAfterCreate));
+  const projects = JSON.parse(stripAnsi(projectsAfterCreate.stdout).trim());
+  assert.equal(projects.length, 1);
+  assert.equal(projects[0].name, "Billing");
+
+  const itemsAfterCreate = runFlow(["list", "--json"], { env });
+  assert.equal(itemsAfterCreate.status, 0, combineOutput(itemsAfterCreate));
+  const createdItems = JSON.parse(stripAnsi(itemsAfterCreate.stdout).trim());
+  assert.equal(createdItems.length, 1);
+  assert.equal(createdItems[0].projectId, projects[0].id);
+
+  const removeResult = runFlow(["project", "remove", String(projects[0].id)], { env });
+  assert.equal(removeResult.status, 0, combineOutput(removeResult));
+
+  const itemsAfterRemove = runFlow(["list", "--json"], { env });
+  assert.equal(itemsAfterRemove.status, 0, combineOutput(itemsAfterRemove));
+  const orphanedItems = JSON.parse(stripAnsi(itemsAfterRemove.stdout).trim());
+  assert.equal(orphanedItems.length, 1);
+  assert.equal(orphanedItems[0].projectId, null);
+
+  const projectsAfterRemove = runFlow(["project", "list", "--json"], { env });
+  assert.equal(projectsAfterRemove.status, 0, combineOutput(projectsAfterRemove));
+  const remainingProjects = JSON.parse(stripAnsi(projectsAfterRemove.stdout).trim());
+  assert.deepEqual(remainingProjects, []);
+});
+
+// Keeps backward compatibility with legacy single-dash long options.
+test("legacy -new and -project options are normalized", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  const addResult = runFlow(["add", "Legacy option task", "-project", "Core"], { env });
+  assert.equal(addResult.status, 0, combineOutput(addResult));
+
+  const editResult = runFlow(["edit", "1", "-new", "Legacy option updated"], { env });
+  assert.equal(editResult.status, 0, combineOutput(editResult));
+
+  const listResult = runFlow(["list", "--json"], { env });
+  assert.equal(listResult.status, 0, combineOutput(listResult));
+  const items = JSON.parse(stripAnsi(listResult.stdout).trim());
+  assert.equal(items.length, 1);
+  assert.equal(items[0].text, "Legacy option updated");
+  assert.equal(typeof items[0].projectId, "number");
+});
+
+// Filters list by project reference (name and id).
+test("list filters activities by project", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["add", "Ship checkout", "--project", "Payments"], { env }).status, 0);
+  assert.equal(runFlow(["later", "Prepare roadmap", "--project", "Platform"], { env }).status, 0);
+
+  const projectsResult = runFlow(["project", "list", "--json"], { env });
+  assert.equal(projectsResult.status, 0, combineOutput(projectsResult));
+  const projects = JSON.parse(stripAnsi(projectsResult.stdout).trim());
+  const payments = projects.find((project) => project.name === "Payments");
+  assert.ok(payments);
+
+  const byName = runFlow(["list", "--project", "Payments", "--json"], { env });
+  assert.equal(byName.status, 0, combineOutput(byName));
+  const byNameItems = JSON.parse(stripAnsi(byName.stdout).trim());
+  assert.equal(byNameItems.length, 1);
+  assert.equal(byNameItems[0].text, "Ship checkout");
+
+  const byId = runFlow(["list", "--project", String(payments.id), "--json"], { env });
+  assert.equal(byId.status, 0, combineOutput(byId));
+  const byIdItems = JSON.parse(stripAnsi(byId.stdout).trim());
+  assert.equal(byIdItems.length, 1);
+  assert.equal(byIdItems[0].projectId, payments.id);
+});
+
+// Filters by today/week/month/date and validates date filter conflicts.
+test("list supports date filters", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["add", "Today item"], { env }).status, 0);
+  assert.equal(runFlow(["later", "Week item"], { env }).status, 0);
+  assert.equal(runFlow(["debt", "Old item"], { env }).status, 0);
+
+  const dataPath = path.join(sandbox.home, ".flow", "data.json");
+  const data = readJson<any>(dataPath);
+
+  const now = dayjs();
+  const todayIso = now.toISOString();
+  const weekIso = now.subtract(2, "day").toISOString();
+  const oldIso = now.subtract(40, "day").toISOString();
+
+  for (const item of data.items) {
+    if (item.text === "Today item") {
+      item.createdAt = todayIso;
+      continue;
+    }
+
+    if (item.text === "Week item") {
+      item.createdAt = weekIso;
+      continue;
+    }
+
+    if (item.text === "Old item") {
+      item.createdAt = oldIso;
+    }
+  }
+
+  fs.writeFileSync(dataPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+
+  const todayResult = runFlow(["list", "--today", "--json"], { env });
+  assert.equal(todayResult.status, 0, combineOutput(todayResult));
+  const todayItems = JSON.parse(stripAnsi(todayResult.stdout).trim());
+  assert.equal(todayItems.length, 1);
+  assert.equal(todayItems[0].text, "Today item");
+
+  const weekResult = runFlow(["list", "--week", "--json"], { env });
+  assert.equal(weekResult.status, 0, combineOutput(weekResult));
+  const weekItems = JSON.parse(stripAnsi(weekResult.stdout).trim());
+  assert.equal(weekItems.length, 2);
+
+  const monthResult = runFlow(["list", "--month", "--json"], { env });
+  assert.equal(monthResult.status, 0, combineOutput(monthResult));
+  const monthItems = JSON.parse(stripAnsi(monthResult.stdout).trim());
+  assert.ok(monthItems.length >= 2);
+
+  const dateValue = now.format("YYYY-MM-DD");
+  const dateResult = runFlow(["list", "--date", dateValue, "--json"], { env });
+  assert.equal(dateResult.status, 0, combineOutput(dateResult));
+  const dateItems = JSON.parse(stripAnsi(dateResult.stdout).trim());
+  assert.equal(dateItems.length, 1);
+  assert.equal(dateItems[0].text, "Today item");
+
+  const conflictResult = runFlow(["list", "--today", "--week"], { env });
+  assert.equal(conflictResult.status, 1, combineOutput(conflictResult));
+  assert.match(combineOutput(conflictResult), /Use one date mode only/);
+
+  const from = now.subtract(3, "day").format("YYYY-MM-DD");
+  const to = now.format("YYYY-MM-DD");
+  const rangeResult = runFlow(["list", "--from", from, "--to", to, "--json"], { env });
+  assert.equal(rangeResult.status, 0, combineOutput(rangeResult));
+  const rangeItems = JSON.parse(stripAnsi(rangeResult.stdout).trim());
+  assert.equal(rangeItems.length, 2);
+
+  const invalidRange = runFlow(["list", "--from", to, "--to", from], { env });
+  assert.equal(invalidRange.status, 1, combineOutput(invalidRange));
+  assert.match(combineOutput(invalidRange), /Invalid date range/);
+});
+
+// Keeps backward compatibility with legacy -date option alias.
+test("legacy -date option is normalized", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["add", "Legacy date filter item"], { env }).status, 0);
+  const dateValue = dayjs().format("YYYY-MM-DD");
+
+  const result = runFlow(["list", "-date", dateValue, "--json"], { env });
+  assert.equal(result.status, 0, combineOutput(result));
+  const items = JSON.parse(stripAnsi(result.stdout).trim());
+  assert.equal(items.length, 1);
+  assert.equal(items[0].text, "Legacy date filter item");
+});
+
+// Keeps backward compatibility with -from/-to aliases.
+test("legacy -from and -to options are normalized", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["add", "Range alias item"], { env }).status, 0);
+  const dateValue = dayjs().format("YYYY-MM-DD");
+
+  const result = runFlow(["list", "-from", dateValue, "-to", dateValue, "--json"], { env });
+  assert.equal(result.status, 0, combineOutput(result));
+  const items = JSON.parse(stripAnsi(result.stdout).trim());
+  assert.equal(items.length, 1);
+  assert.equal(items[0].text, "Range alias item");
+});
+
+// Verifies project rename updates project name without breaking assignments.
+test("project rename updates existing project", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["add", "Task with project", "--project", "Payments"], { env }).status, 0);
+
+  const projectsBefore = runFlow(["project", "list", "--json"], { env });
+  assert.equal(projectsBefore.status, 0, combineOutput(projectsBefore));
+  const projects = JSON.parse(stripAnsi(projectsBefore.stdout).trim());
+  assert.equal(projects.length, 1);
+
+  const rename = runFlow(["project", "rename", String(projects[0].id), "Payments API"], { env });
+  assert.equal(rename.status, 0, combineOutput(rename));
+
+  const projectsAfter = runFlow(["project", "list", "--json"], { env });
+  assert.equal(projectsAfter.status, 0, combineOutput(projectsAfter));
+  const renamedProjects = JSON.parse(stripAnsi(projectsAfter.stdout).trim());
+  assert.equal(renamedProjects[0].name, "Payments API");
+
+  const listResult = runFlow(["list", "--project", "Payments API", "--json"], { env });
+  assert.equal(listResult.status, 0, combineOutput(listResult));
+  const items = JSON.parse(stripAnsi(listResult.stdout).trim());
+  assert.equal(items.length, 1);
+});
+
+// Verifies remove deletes an item and undo restores it.
+test("remove deletes activity and undo restores it", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["later", "To be removed"], { env }).status, 0);
+
+  const removeResult = runFlow(["remove", "1"], { env });
+  assert.equal(removeResult.status, 0, combineOutput(removeResult));
+
+  const afterRemove = runFlow(["list", "--json"], { env });
+  assert.equal(afterRemove.status, 0, combineOutput(afterRemove));
+  assert.deepEqual(JSON.parse(stripAnsi(afterRemove.stdout).trim()), []);
+
+  const undoResult = runFlow(["undo"], { env });
+  assert.equal(undoResult.status, 0, combineOutput(undoResult));
+
+  const afterUndo = runFlow(["list", "--json"], { env });
+  assert.equal(afterUndo.status, 0, combineOutput(afterUndo));
+  const items = JSON.parse(stripAnsi(afterUndo.stdout).trim());
+  assert.equal(items.length, 1);
+  assert.equal(items[0].text, "To be removed");
+});
+
+// Verifies stats supports project/date filters and returns filtered aggregates.
+test("stats supports project and date filters", (t) => {
+  const sandbox = createSandbox();
+  t.after(() => removeSandbox(sandbox.root));
+  const env = buildHomeEnv(sandbox.home);
+
+  assert.equal(runFlow(["add", "Done payment", "--project", "Payments"], { env }).status, 0);
+  assert.equal(runFlow(["later", "Open payment", "--project", "Payments"], { env }).status, 0);
+  assert.equal(runFlow(["debt", "Other project debt", "--project", "Platform"], { env }).status, 0);
+
+  const dataPath = path.join(sandbox.home, ".flow", "data.json");
+  const data = readJson<any>(dataPath);
+  const now = dayjs();
+  const oldIso = now.subtract(20, "day").toISOString();
+
+  for (const item of data.items) {
+    if (item.text === "Open payment") {
+      item.createdAt = oldIso;
+    }
+  }
+
+  fs.writeFileSync(dataPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+
+  const statsToday = runFlow(["stats", "--project", "Payments", "--today", "--json"], { env });
+  assert.equal(statsToday.status, 0, combineOutput(statsToday));
+  const todayStats = JSON.parse(stripAnsi(statsToday.stdout).trim());
+  assert.equal(todayStats.total, 1);
+  assert.equal(todayStats.done, 1);
+  assert.equal(todayStats.open, 0);
+
+  const statsRange = runFlow(["stats", "--project", "Payments", "--from", now.subtract(30, "day").format("YYYY-MM-DD"), "--to", now.format("YYYY-MM-DD"), "--json"], { env });
+  assert.equal(statsRange.status, 0, combineOutput(statsRange));
+  const rangeStats = JSON.parse(stripAnsi(statsRange.stdout).trim());
+  assert.equal(rangeStats.total, 2);
+  assert.equal(rangeStats.done, 1);
+  assert.equal(rangeStats.open, 1);
 });

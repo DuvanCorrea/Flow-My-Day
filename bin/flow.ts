@@ -17,13 +17,17 @@ function onFatal(source) {
 process.on("uncaughtException", onFatal("uncaughtException"));
 process.on("unhandledRejection", onFatal("unhandledRejection"));
 
-try {
-	run();
-} catch (error) {
-	handleFatalError(error, {
-		source: "topLevel",
-		argv: process.argv,
-		cwd: process.cwd()
-	});
-	process.exit(1);
+async function main(): Promise<void> {
+	try {
+		await run();
+	} catch (error) {
+		handleFatalError(error, {
+			source: "topLevel",
+			argv: process.argv,
+			cwd: process.cwd()
+		});
+		process.exit(1);
+	}
 }
+
+void main();
