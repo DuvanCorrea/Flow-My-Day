@@ -1,6 +1,6 @@
 {
   "name": "flow-my-day",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Personal productivity CLI to track completed tasks, later tasks, and technical debt.",
   "type": "module",
   "bin": {
