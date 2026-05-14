@@ -120,7 +120,7 @@ function renderGroupedItems(items: Activity[], labels: RenderListLabels): void {
       const createdAt = chalk.gray(`[${formatTimestamp(item.createdAt, labels.unknownTime)}]`);
       const projectName = item.projectId ? labels.projectsById.get(item.projectId) || labels.projectNone : labels.projectNone;
       const projectTag = chalk.cyan(`[${labels.projectLabel}: ${projectName}]`);
-      console.log("  -", style.color(`#${item.id}`), statusTag, item.text, projectTag, createdAt);
+      console.log("  -", style.color(`#${item.id}`), statusTag, projectTag, item.text, createdAt);
     }
   }
 }
